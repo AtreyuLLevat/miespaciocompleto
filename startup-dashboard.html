@@ -1223,8 +1223,10 @@ async function onUserReady(user){
   await loadFromCloud(user.id);
   seedIfEmpty();
   render();
+  save(); // reintento sync por si se llamó save() antes de tener userId
 }
-window.MiEspacio.initAuthOptional(onUserReady);
+
+window.MiEspacio.initAuth(onUserReady);
 </script>
 </body>
 </html>

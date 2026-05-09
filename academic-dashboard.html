@@ -1435,8 +1435,10 @@ async function onUserReady(user){
   await loadFromCloud(user.id);
   renderSection(currentSection);
   populateSubjectSelects();
+  saveLocal(); // persiste en local; el sync cloud se hará en la próxima acción del usuario
 }
-window.MiEspacio.initAuthOptional(onUserReady);
+
+window.MiEspacio.initAuth(onUserReady);
 </script>
 </body>
 </html>

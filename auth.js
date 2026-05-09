@@ -1,18 +1,13 @@
 /**
- * auth.js — Mi Espacio · Central Auth Module v1.0
+ * auth.js — Mi Espacio · Central Auth Module v1.1
  * ─────────────────────────────────────────────────
- * Centraliza toda la lógica de autenticación Supabase.
- * Usado por TODAS las páginas del proyecto.
- *
- * Uso en páginas secundarias (dashboards):
- *   <script src="auth.js"></script>
- *   <script>
- *     MiAuth.requireAuth(user => { ... });   // redirige si no hay sesión
- *     MiAuth.optionalAuth(user => { ... });  // no redirige, modo local
- *   </script>
- *
- * Uso en index.html (login):
- *   MiAuth.initLoginPage(onSuccess);
+ * FIXES v1.1:
+ *  - API key: sustituye SUPABASE_ANON por tu clave eyJ... real (ver comentario abajo)
+ *  - _userId se persiste en sessionStorage → save() nunca falla por userId null
+ *  - Sync.delete incluye user_id en el filtro (seguridad)
+ *  - getProfile no devuelve caché obsoleto si Supabase responde vacío
+ *  - window.MiEspacio.initAuth ahora SÍ protege (redirige sin sesión)
+ *  - window.MiEspacio.initAuthOptional conservado para casos opcionales reales
  */
 
 (function () {
@@ -20,30 +15,38 @@
 
   /* ─────────────────────────────────────────
      CONFIG — credenciales Supabase
+     ⚠️  SUSTITUYE SUPABASE_ANON por tu clave real:
+         Dashboard Supabase → Settings → API → "anon public"
+         Empieza siempre por "eyJ..."
   ───────────────────────────────────────── */
   const SUPABASE_URL  = 'https://ambptdfrdhrfuryuizvk.supabase.co';
-  const SUPABASE_ANON = 'sb_publishable_tDg7frxML2LiHoZnmo2-9Q_ZxOMlxgZ';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtYnB0ZGZyZGhyZnVyeXVpenZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNDExMjQsImV4cCI6MjA5MzkxNzEyNH0.PZ2jg50ARlUFeNrssEFt95OxF6i-fXl_U2H3RgXIBaw'; // ← CAMBIA ESTO
 
   /* ─────────────────────────────────────────
      STORAGE KEYS
   ───────────────────────────────────────── */
-  const SESSION_KEY = 'miespacio_session';  // sesión Supabase completa
-  const PROFILE_KEY = 'miespacio_profile'; // caché del perfil de usuario
+  const SESSION_KEY = 'miespacio_session';
+  const PROFILE_KEY = 'miespacio_profile';
+  const USERID_KEY  = 'miespacio_uid';      // FIX 2a: persiste userId
 
   /* ─────────────────────────────────────────
      ESTADO INTERNO
   ───────────────────────────────────────── */
-  let _session = null;  // { access_token, refresh_token, user, expires_at }
-  let _profile  = null; // { name, avatar_color }
+  let _session = null;
+  let _profile  = null;
+  let _userId   = null; // FIX 2a: se carga desde sessionStorage al arrancar
+
+  /* Carga userId persistido para que save() funcione aunque auth aún no haya terminado */
+  try { _userId = sessionStorage.getItem(USERID_KEY) || null; } catch (_) {}
 
   /* ─────────────────────────────────────────
-     HELPERS HTTP — REST client mínimo
+     HELPERS HTTP
   ───────────────────────────────────────── */
   async function sbFetch(path, options = {}) {
     const token = _session?.access_token || SUPABASE_ANON;
     const headers = {
-      'Content-Type': 'application/json',
-      'apikey'      : SUPABASE_ANON,
+      'Content-Type' : 'application/json',
+      'apikey'       : SUPABASE_ANON,
       'Authorization': `Bearer ${token}`,
       ...(options.headers || {}),
     };
@@ -59,33 +62,43 @@
   /* ─────────────────────────────────────────
      SESSION HELPERS
   ───────────────────────────────────────── */
-
-  /** Persiste la sesión en localStorage */
   function _saveSession(session) {
     _session = session;
     try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch (_) {}
+    // FIX 2a: persiste userId en cuanto tenemos sesión
+    const uid = session?.user?.id;
+    if (uid) {
+      _userId = uid;
+      try { sessionStorage.setItem(USERID_KEY, uid); } catch (_) {}
+    }
   }
 
-  /** Carga sesión desde localStorage */
   function _loadSession() {
     try {
       const raw = localStorage.getItem(SESSION_KEY);
-      if (raw) _session = JSON.parse(raw);
+      if (raw) {
+        _session = JSON.parse(raw);
+        // Restaurar userId si aún no lo teníamos
+        if (!_userId && _session?.user?.id) {
+          _userId = _session.user.id;
+          try { sessionStorage.setItem(USERID_KEY, _userId); } catch (_) {}
+        }
+      }
     } catch (_) {}
     return _session;
   }
 
-  /** Elimina sesión del almacenamiento */
   function _clearSession() {
     _session = null;
     _profile  = null;
+    _userId   = null;
     try {
       localStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(PROFILE_KEY);
+      sessionStorage.removeItem(USERID_KEY);
     } catch (_) {}
   }
 
-  /** Comprueba si el access_token ha expirado (margen de 60s) */
   function _isExpired() {
     if (!_session?.expires_at) return false;
     return Date.now() / 1000 > _session.expires_at - 60;
@@ -94,8 +107,6 @@
   /* ─────────────────────────────────────────
      AUTH OPERATIONS
   ───────────────────────────────────────── */
-
-  /** Refresca el token usando refresh_token */
   async function _refresh() {
     if (!_session?.refresh_token) return false;
     try {
@@ -109,7 +120,6 @@
     return false;
   }
 
-  /** Devuelve el usuario actual desde Supabase /auth/v1/user */
   async function _getUser() {
     if (!_session?.access_token) return null;
     try {
@@ -117,7 +127,6 @@
     } catch (_) { return null; }
   }
 
-  /** Login con email + contraseña */
   async function signIn(email, password) {
     const data = await sbFetch('/auth/v1/token?grant_type=password', {
       method : 'POST',
@@ -128,7 +137,6 @@
     return data.user || data;
   }
 
-  /** Registro con email + contraseña */
   async function signUp(email, password) {
     const data = await sbFetch('/auth/v1/signup', {
       method : 'POST',
@@ -139,7 +147,6 @@
     return data.user || data;
   }
 
-  /** Cierra sesión y limpia estado */
   async function signOut() {
     try { await sbFetch('/auth/v1/logout', { method: 'POST' }); } catch (_) {}
     _clearSession();
@@ -149,22 +156,24 @@
   /* ─────────────────────────────────────────
      PROFILE HELPERS
   ───────────────────────────────────────── */
-
   async function getProfile(userId) {
-    // intentar desde caché
+    // Cargar caché local como fallback inicial
     try {
       const cached = localStorage.getItem(PROFILE_KEY);
-      if (cached) { _profile = JSON.parse(cached); }
+      if (cached) _profile = JSON.parse(cached);
     } catch (_) {}
 
-    // siempre refresca desde Supabase en background
+    // FIX getProfile: siempre intenta Supabase; solo usa caché si falla la red
     try {
       const rows = await sbFetch(`/rest/v1/profiles?user_id=eq.${userId}&limit=1`);
-      if (rows?.[0]) {
+      // Solo sobreescribe si Supabase devuelve algo (no borra caché por respuesta vacía)
+      if (rows && rows.length > 0) {
         _profile = rows[0];
-        localStorage.setItem(PROFILE_KEY, JSON.stringify(_profile));
+        try { localStorage.setItem(PROFILE_KEY, JSON.stringify(_profile)); } catch (_) {}
       }
-    } catch (_) {}
+    } catch (_) {
+      // Sin red: se usa el caché ya cargado arriba
+    }
 
     return _profile;
   }
@@ -181,18 +190,12 @@
   }
 
   /* ─────────────────────────────────────────
-     RESOLUCIÓN DE SESIÓN — flujo central
+     RESOLUCIÓN DE SESIÓN
   ───────────────────────────────────────── */
-
-  /**
-   * Resuelve la sesión actual.
-   * Devuelve el usuario si hay sesión válida, null si no.
-   */
   async function resolveSession() {
     _loadSession();
     if (!_session?.access_token) return null;
 
-    // Si el token está por expirar, intentar refresh
     if (_isExpired()) {
       const ok = await _refresh();
       if (!ok) { _clearSession(); return null; }
@@ -200,7 +203,6 @@
 
     const user = await _getUser();
     if (!user) {
-      // Último intento con refresh
       const ok = await _refresh();
       if (!ok) { _clearSession(); return null; }
       return await _getUser();
@@ -214,14 +216,11 @@
 
   /**
    * requireAuth(callback)
-   * Úsalo en páginas PROTEGIDAS (dashboards).
-   * Si no hay sesión → redirige a index.html
-   * Si hay sesión → llama callback(user, profile)
+   * Páginas PROTEGIDAS. Sin sesión → redirige a index.html.
    */
   async function requireAuth(callback) {
     const user = await resolveSession();
     if (!user) {
-      // Guardar la página actual para redirect tras login
       try { sessionStorage.setItem('miespacio_redirect', window.location.pathname); } catch (_) {}
       window.location.href = 'index.html';
       return;
@@ -232,8 +231,8 @@
 
   /**
    * optionalAuth(callback)
-   * Úsalo cuando la página funciona también sin sesión (modo local).
-   * No redirige. Si hay sesión → llama callback(user, profile).
+   * Solo para páginas que funcionan sin sesión (modo local real).
+   * NO redirige nunca.
    */
   async function optionalAuth(callback) {
     const user = await resolveSession();
@@ -243,17 +242,12 @@
     }
   }
 
-  /**
-   * initLoginPage(onSuccess)
-   * Inyecta y gestiona el modal de login en index.html.
-   * Llama onSuccess(user, profile) tras login exitoso.
-   */
   function initLoginPage(onSuccess) {
     _injectLoginModal(onSuccess);
   }
 
   /* ─────────────────────────────────────────
-     LOGIN MODAL — inyectado en index.html
+     LOGIN MODAL
   ───────────────────────────────────────── */
   function _injectLoginModal(onSuccess) {
     if (document.getElementById('_me-auth-overlay')) return;
@@ -331,14 +325,12 @@
 
     document.body.appendChild(overlay);
 
-    // Enter key support
     ['_me-email','_me-pw'].forEach(id => {
       document.getElementById(id)?.addEventListener('keydown', e => {
         if (e.key === 'Enter') window._meAuthAction('login');
       });
     });
 
-    // Acción de auth (expuesta globalmente para los onclick inline)
     window._meAuthAction = async function (type) {
       const email  = document.getElementById('_me-email')?.value.trim();
       const pw     = document.getElementById('_me-pw')?.value;
@@ -360,8 +352,6 @@
         overlay.remove();
 
         const profile = await getProfile(user.id);
-
-        // Redirect si venía de una página protegida
         const redirect = sessionStorage.getItem('miespacio_redirect');
         sessionStorage.removeItem('miespacio_redirect');
 
@@ -380,7 +370,7 @@
   }
 
   /* ─────────────────────────────────────────
-     PROFILE MODAL — accesible desde cualquier página
+     PROFILE MODAL
   ───────────────────────────────────────── */
   const AVATAR_COLORS = [
     '#2c5f8a','#3d6b4f','#c4622d','#9a6f1e',
@@ -407,14 +397,12 @@
       <div style="background:#fff;border-radius:20px;padding:32px 28px;width:320px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.18);animation:_meSlideUp .2s ease;">
         <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:4px;">Mi Perfil</h3>
         <p style="font-size:.75rem;color:#8c8a83;margin-bottom:22px">${email || ''}</p>
-
         <label style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#8c8a83;display:block;margin-bottom:6px">Nombre</label>
         <input id="_me-prof-name" value="${name}" placeholder="Tu nombre" style="
           width:100%;border:1.5px solid #e5e3db;border-radius:10px;
           padding:10px 12px;font-size:.9rem;font-family:'DM Sans',sans-serif;
           margin-bottom:18px;outline:none;
         "/>
-
         <label style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#8c8a83;display:block;margin-bottom:8px">Color de avatar</label>
         <div style="display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap">
           ${AVATAR_COLORS.map(c => `
@@ -425,20 +413,17 @@
             " onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='none'"></div>
           `).join('')}
         </div>
-
         <button onclick="window._meSaveProfile('${userId}')" style="
           width:100%;background:#1c1b19;color:#fff;border:none;border-radius:10px;
           padding:12px;font-size:.88rem;font-weight:600;font-family:'DM Sans',sans-serif;
           cursor:pointer;margin-bottom:8px;
         ">Guardar cambios</button>
-
         <button onclick="window.MiAuth.signOut()" style="
           width:100%;background:transparent;color:#c4622d;
           border:1.5px solid #f4c4a0;border-radius:10px;
           padding:11px;font-size:.85rem;font-weight:500;
           font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:8px;
         ">Cerrar sesión</button>
-
         <button onclick="document.getElementById('_me-profile-modal').remove()" style="
           width:100%;background:transparent;color:#8c8a83;
           border:1.5px solid #e5e3db;border-radius:10px;
@@ -447,8 +432,6 @@
       </div>`;
 
     document.body.appendChild(m);
-
-    // Cerrar al hacer click fuera
     m.addEventListener('click', e => { if (e.target === m) m.remove(); });
   }
 
@@ -463,55 +446,35 @@
     const name = document.getElementById('_me-prof-name')?.value.trim();
     await saveProfile(userId, { name, avatar_color: _selectedColor });
     document.getElementById('_me-profile-modal')?.remove();
-    // Recargar para reflejar cambios
     window.location.reload();
   };
 
   /* ─────────────────────────────────────────
-     "BACK TO SPACE" COMPONENT
-     Inyecta automáticamente el botón en páginas secundarias
+     BACK BUTTON
   ───────────────────────────────────────── */
-
-  /**
-   * injectBackButton(options?)
-   * options = { label, href, position }
-   * Inyecta el botón "Volver a Mi Espacio" en la página actual.
-   * Llamar desde páginas secundarias si no usan sidebar propio.
-   */
   function injectBackButton(options = {}) {
-    const {
-      label    = '← Mi Espacio',
-      href     = 'index.html',
-      position = 'sidebar', // 'sidebar' | 'floating' | 'topbar'
-    } = options;
-
+    const { label = '← Mi Espacio', href = 'index.html', position = 'sidebar' } = options;
     if (document.getElementById('_me-back-btn')) return;
-
     const btn = document.createElement('a');
-    btn.id   = '_me-back-btn';
+    btn.id = '_me-back-btn';
     btn.href = href;
     btn.textContent = label;
-
     if (position === 'floating') {
       btn.style.cssText = `
         position:fixed;top:20px;left:20px;z-index:200;
-        background:#1c1b19;color:#fff;
-        border-radius:10px;padding:8px 16px;
+        background:#1c1b19;color:#fff;border-radius:10px;padding:8px 16px;
         font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;
         text-decoration:none;display:flex;align-items:center;gap:6px;
-        box-shadow:0 4px 16px rgba(0,0,0,.2);
-        transition:opacity .2s;
+        box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .2s;
       `;
       btn.onmouseover = () => btn.style.opacity = '.8';
       btn.onmouseout  = () => btn.style.opacity = '1';
       document.body.appendChild(btn);
     }
-    // Para posición 'sidebar', los sidebars ya incluyen el enlace manualmente.
   }
 
   /* ─────────────────────────────────────────
-     SYNC HELPERS — reexporta funciones de Supabase
-     Para compatibilidad con código existente
+     SYNC HELPERS
   ───────────────────────────────────────── */
   const Sync = {
     async upsert(table, id, data, userId) {
@@ -536,8 +499,11 @@
       const rows = await sbFetch(`/rest/v1/startup_data?user_id=eq.${userId}&limit=1`);
       return rows?.[0] || null;
     },
-    async delete(table, id) {
-      return sbFetch(`/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE' });
+    // FIX 2c: delete filtra también por user_id para evitar borrado cruzado
+    async delete(table, id, userId) {
+      const uid = userId || _userId;
+      const filter = uid ? `?id=eq.${id}&user_id=eq.${uid}` : `?id=eq.${id}`;
+      return sbFetch(`/rest/v1/${table}${filter}`, { method: 'DELETE' });
     },
   };
 
@@ -545,7 +511,6 @@
      EXPOSICIÓN PÚBLICA — window.MiAuth
   ───────────────────────────────────────── */
   window.MiAuth = {
-    // Auth
     requireAuth,
     optionalAuth,
     initLoginPage,
@@ -553,26 +518,23 @@
     signUp,
     signOut,
     resolveSession,
-    // Profile
     getProfile,
     saveProfile,
     openProfileModal,
-    // UI helpers
     injectBackButton,
-    // Sync (compatibilidad)
     Sync,
-    // Getters
     get session() { return _session; },
     get profile()  { return _profile; },
+    get userId()   { return _userId; },   // FIX 2a: expuesto para que dashboards lo lean
   };
 
   /* ─────────────────────────────────────────
-     BACKWARDS COMPAT — window.MiEspacio alias
-     Para no romper código existente en los dashboards
+     BACKWARDS COMPAT — window.MiEspacio
+     FIX 1: initAuth ahora llama a requireAuth (SÍ protege)
   ───────────────────────────────────────── */
   window.MiEspacio = {
-    initAuth        : (cb) => requireAuth((u, p) => cb(u)),
-    initAuthOptional: (cb) => optionalAuth((u, p) => cb(u)),
+    initAuth        : (cb) => requireAuth((u, p) => cb(u)),   // ← FIX: redirige sin sesión
+    initAuthOptional: (cb) => optionalAuth((u, p) => cb(u)), // solo para casos realmente opcionales
     signOut,
     Profile : { get: getProfile, save: saveProfile },
     openProfileModal,

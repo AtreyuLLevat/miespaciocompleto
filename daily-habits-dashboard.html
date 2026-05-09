@@ -768,8 +768,14 @@ async function loadFromCloud(userId){
 /* ════════════════════════════════
    HELPERS DATE
 ════════════════════════════════ */
-function todayStr(){ return new Date().toISOString().slice(0,10); }
-function dateStr(d){ return d.toISOString().slice(0,10); }
+    function todayStr(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function dateStr(d){
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 
 function getTodayChecks(){
@@ -1390,8 +1396,9 @@ async function onUserReady(user){
   // Cargar datos cloud (sobreescribe localStorage si hay datos)
   await loadFromCloud(user.id);
   updateStreaks(); render();
+  save(); 
 }
-window.MiEspacio.initAuthOptional(onUserReady);
+window.MiEspacio.initAuth(onUserReady);
 
 // ── Service Worker registration ──
 if('serviceWorker' in navigator){
