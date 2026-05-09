@@ -330,11 +330,38 @@
     injectAuthModal();
   }
 
+  /**
+   * initAuthOptional — igual que initAuth pero sin bloquear con login.
+   * Úsalo en las páginas internas (dashboards).
+   * Si hay sesión válida → llama a onUserReady para sincronizar con la nube.
+   * Si no hay sesión → el dashboard sigue funcionando en modo local (localStorage).
+   */
+  async function initAuthOptional(onUserReady) {
+    loadSession();
+
+    if (_session?.access_token) {
+      let user = await getUser();
+
+      if (!user && _session.refresh_token) {
+        const refreshed = await refreshSession();
+        if (refreshed) user = await getUser();
+      }
+
+      if (user) {
+        onUserReady(user);
+      }
+      // Si el token no es válido, simplemente no llamamos a onUserReady
+      // y el dashboard funciona en modo local sin mostrar ningún modal.
+    }
+    // Sin sesión → modo local silencioso, sin modal.
+  }
+
   /* ─────────────────────────────────────────
      EXPOSICIÓN PÚBLICA
   ───────────────────────────────────────── */
   window.MiEspacio = {
     initAuth,
+    initAuthOptional,
     signOut,
     Sync,
     Profile,

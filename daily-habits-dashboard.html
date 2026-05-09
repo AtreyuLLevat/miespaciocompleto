@@ -1391,7 +1391,7 @@ async function onUserReady(user){
   await loadFromCloud(user.id);
   updateStreaks(); render();
 }
-window.MiEspacio.initAuth(onUserReady);
+window.MiEspacio.initAuthOptional(onUserReady);
 
 // ── Service Worker registration ──
 if('serviceWorker' in navigator){
