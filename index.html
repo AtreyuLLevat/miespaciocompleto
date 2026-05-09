@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mi Espacio Personal</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#1c1b19"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Mi Espacio"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f8f7f4;
+  --surface: #ffffff;
+  --border: #e5e3db;
+  --text: #1c1b19;
+  --muted: #8c8a83;
+  --green: #3d6b4f;
+  --green-l: #eaf2ed;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ── Top bar ── */
+.topbar {
+  padding: 20px 32px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  letter-spacing: -.01em;
+  color: var(--text);
+}
+.topbar-date {
+  font-family: 'DM Mono', monospace;
+  font-size: .72rem;
+  color: var(--muted);
+}
+
+/* ── Hero ── */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 20px;
+  text-align: center;
+}
+
+.greeting {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.greeting em { font-style: italic; color: var(--muted); }
+
+.hero-sub {
+  font-size: .92rem;
+  color: var(--muted);
+  margin-bottom: 52px;
+}
+
+/* ── Cards grid ── */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  max-width: 600px;
+  width: 100%;
+}
+
+@media(max-width: 480px) {
+  .cards { grid-template-columns: 1fr; max-width: 340px; }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px 26px 24px;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform .2s cubic-bezier(.4,0,.2,1), box-shadow .2s, border-color .2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--card-accent, #e5e3db);
+  transition: opacity .2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.1);
+  border-color: var(--card-accent, var(--border));
+}
+
+.card-vida { --card-accent: #3d6b4f; }
+.card-startup { --card-accent: #1c1b19; }
+
+.card-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  background: var(--card-icon-bg, var(--bg));
+  flex-shrink: 0;
+}
+.card-vida .card-icon { background: #eaf2ed; }
+.card-startup .card-icon { background: #f1f0ec; }
+
+.card-info { flex: 1; }
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  letter-spacing: -.01em;
+  margin-bottom: 5px;
+}
+.card-desc {
+  font-size: .8rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.card-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 1.1rem;
+  color: var(--muted);
+  transition: color .2s, transform .2s;
+}
+.card:hover .card-arrow {
+  color: var(--text);
+  transform: translateX(4px);
+}
+
+/* ── Pills row ── */
+.pills {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-top: 6px;
+}
+.pill {
+  font-size: .65rem; font-weight: 600; letter-spacing: .06em;
+  padding: 3px 8px; border-radius: 99px;
+  text-transform: uppercase;
+  background: var(--bg); color: var(--muted);
+  border: 1px solid var(--border);
+}
+.card-vida .pill { background: #eaf2ed; color: #3d6b4f; border-color: #c2d9c8; }
+.card-startup .pill { background: #f1f0ec; color: #555; border-color: #e0ded6; }
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 20px 24px 32px;
+  font-size: .72rem;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .04em;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+.hero        { animation: fadeUp .4s ease both; }
+.card        { animation: fadeUp .4s ease both; }
+.card:nth-child(1) { animation-delay: .1s; }
+.card:nth-child(2) { animation-delay: .18s; }
+
+/* ── Install button ── */
+#install-btn {
+  display: none;
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: #fff;
+  border: none; border-radius: 12px; padding: 12px 24px;
+  font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 600;
+  cursor: pointer; gap: 8px; align-items: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,.25);
+  z-index: 100;
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Mi Espacio</div>
+  <div class="topbar-date" id="top-date"></div>
+</div>
+
+<div class="hero">
+  <div class="greeting" id="greeting">Hola, <em>bienvenido.</em></div>
+  <div class="hero-sub">¿A dónde vas hoy?</div>
+
+  <div class="cards">
+
+    <a class="card card-vida" href="daily-habits-dashboard.html">
+      <div class="card-icon">🌱</div>
+      <div class="card-info">
+        <div class="card-title">Vida Diaria</div>
+        <div class="card-desc">Hábitos, rutinas, ánimo y diario personal</div>
+        <div class="pills">
+          <span class="pill">Hábitos</span>
+          <span class="pill">Rutinas</span>
+          <span class="pill">Ánimo</span>
+        </div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a class="card card-startup" href="startup-dashboard.html">
+      <div class="card-icon">🚀</div>
+      <div class="card-info">
+        <div class="card-title">Startup OS</div>
+        <div class="card-desc">KPIs, tareas, revenue y actividad de tu proyecto</div>
+        <div class="pills">
+          <span class="pill">MRR</span>
+          <span class="pill">Tareas</span>
+          <span class="pill">Revenue</span>
+        </div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+  </div>
+</div>
+
+<div class="footer" id="footer-streak"></div>
+
+<button id="install-btn" onclick="installApp()">📲 Instalar como app</button>
+
+<script>
+// ── Date & greeting ──
+const now = new Date();
+const h = now.getHours();
+const greet = h < 12 ? 'Buenos días,' : h < 18 ? 'Buenas tardes,' : 'Buenas noches,';
+document.getElementById('greeting').innerHTML = `${greet} <em>bienvenido.</em>`;
+document.getElementById('top-date').textContent = now.toLocaleDateString('es-ES', {
+  weekday: 'long', day: 'numeric', month: 'long'
+});
+
+// ── Pull habit streak from Vida Diaria storage ──
+try {
+  const raw = localStorage.getItem('vidaDiaria_v2');
+  if (raw) {
+    const S = JSON.parse(raw);
+    const habits = S.habits || [];
+    const streaks = S.streaks || {};
+    const maxStreak = habits.length
+      ? Math.max(...habits.map(h => streaks[h.id] || 0))
+      : 0;
+    const todayKey = now.toISOString().slice(0, 10);
+    const checks = (S.todayChecks || {})[todayKey] || {};
+    const doneToday = habits.filter(h => checks[h.id]).length;
+    const total = habits.length;
+    if (total > 0) {
+      document.getElementById('footer-streak').textContent =
+        `${doneToday}/${total} hábitos hoy · 🔥 ${maxStreak} días de racha`;
+    }
+  }
+} catch(e) {}
+
+// ── PWA install ──
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-btn').style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-btn').style.display = 'none';
+});
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  }
+}
+
+// ── Service Worker ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

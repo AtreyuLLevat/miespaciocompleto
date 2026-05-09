@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Startup Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Epilogue:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f7f6f3;
+  --surface:  #ffffff;
+  --s2:       #f0efe9;
+  --border:   #e4e2da;
+  --text:     #1a1a1a;
+  --muted:    #8a8880;
+  --accent:   #1a1a1a;
+  --green:    #1a7f5a;
+  --green-l:  #e8f5ef;
+  --red:      #c0392b;
+  --red-l:    #fdf0ee;
+  --amber:    #b45309;
+  --amber-l:  #fef3e2;
+  --blue:     #1d4ed8;
+  --blue-l:   #eff6ff;
+  --gold:     #92620a;
+  --radius:   10px;
+  --shadow-s: 0 1px 4px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  --shadow-m: 0 4px 16px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.05);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Epilogue', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Sidebar + Main layout ── */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--text);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 0 22px 28px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: 20px;
+}
+.sidebar-logo h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.25rem;
+  letter-spacing: -.02em;
+  color: #fff;
+}
+.sidebar-logo p {
+  font-size: .72rem;
+  color: rgba(255,255,255,.4);
+  margin-top: 2px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.nav-group { margin-bottom: 24px; }
+.nav-group-label {
+  font-size: .62rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  padding: 0 22px 8px;
+  font-weight: 600;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 22px;
+  font-size: .88rem; font-weight: 500;
+  color: rgba(255,255,255,.55);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+.nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: #fff; }
+.nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 16px 22px 0;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
+.sidebar-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .72rem;
+  color: rgba(255,255,255,.3);
+}
+
+/* ── Main ── */
+.main {
+  margin-left: 220px;
+  flex: 1;
+  padding: 36px 32px 60px;
+  min-width: 0;
+}
+
+/* ── Page sections ── */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ── Page header ── */
+.page-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 28px;
+}
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.9rem; letter-spacing: -.02em; line-height: 1.1;
+}
+.page-sub { font-size: .82rem; color: var(--muted); margin-top: 3px; }
+
+/* ── KPI Grid ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-s);
+  position: relative;
+}
+.kpi-label { font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.kpi-value { font-family: 'DM Serif Display', serif; font-size: 2rem; line-height: 1; color: var(--text); }
+.kpi-sub { font-size: .75rem; color: var(--muted); margin-top: 5px; }
+.kpi-change { font-size: .75rem; font-weight: 600; margin-top: 4px; }
+.kpi-change.up { color: var(--green); }
+.kpi-change.down { color: var(--red); }
+
+/* editable KPI */
+.kpi-edit-wrap { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.kpi-input {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .82rem; font-weight: 600;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 8px; color: var(--text);
+  width: 120px; outline: none;
+}
+.kpi-input:focus { border-color: var(--text); }
+.kpi-save-btn {
+  font-size: .72rem; font-weight: 600;
+  background: var(--text); color: #fff;
+  border: none; border-radius: 6px; padding: 4px 10px;
+  cursor: pointer; transition: opacity .2s;
+}
+.kpi-save-btn:hover { opacity: .8; }
+
+/* ── Two-col layout ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media(max-width:700px){ .two-col { grid-template-columns: 1fr; } }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+@media(max-width:700px){ .three-col { grid-template-columns: 1fr; } }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-s);
+}
+.card-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-size: .82rem; font-weight: 700; letter-spacing: .04em; }
+.card-action {
+  font-size: .75rem; color: var(--muted); cursor: pointer;
+  font-weight: 500; transition: color .15s;
+}
+.card-action:hover { color: var(--text); }
+.card-body { padding: 16px 20px; }
+
+/* ── Progress bars ── */
+.prog-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.prog-row:last-child { margin-bottom: 0; }
+.prog-header { display: flex; justify-content: space-between; align-items: center; }
+.prog-label { font-size: .8rem; font-weight: 500; }
+.prog-val { font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--muted); }
+.prog-track {
+  height: 6px; background: var(--s2); border-radius: 99px;
+  overflow: hidden; border: 1px solid var(--border);
+}
+.prog-fill {
+  height: 100%; border-radius: 99px;
+  background: var(--text);
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.prog-fill.green  { background: var(--green); }
+.prog-fill.amber  { background: var(--amber); }
+.prog-fill.blue   { background: var(--blue); }
+.prog-fill.gold   { background: linear-gradient(90deg,#c9860a,#f0b429); }
+
+/* ── Task Lists ── */
+.task-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  animation: fadeIn .2s ease;
+}
+.task-item:last-child { border-bottom: none; }
+
+.task-check {
+  width: 18px; height: 18px; border-radius: 4px;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0; cursor: pointer; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; transition: all .15s;
+}
+.task-check:hover { border-color: var(--text); }
+.task-item.done .task-check {
+  background: var(--green); border-color: var(--green);
+}
+.task-check::after { content:'✓'; font-size:.65rem; color:#fff; opacity:0; transition:opacity .15s; font-weight:700; }
+.task-item.done .task-check::after { opacity:1; }
+
+.task-content { flex:1; min-width:0; }
+.task-text {
+  font-size: .88rem; font-weight: 500; line-height: 1.4;
+  transition: opacity .2s;
+}
+.task-item.done .task-text { opacity: .35; text-decoration: line-through; }
+
+.task-meta { display: flex; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+.task-tag {
+  font-size: .65rem; font-weight: 600; letter-spacing: .06em;
+  padding: 1px 7px; border-radius: 4px; text-transform: uppercase;
+}
+.tag-dev   { background: var(--blue-l);  color: var(--blue); }
+.tag-biz   { background: var(--green-l); color: var(--green); }
+.tag-mkt   { background: var(--amber-l); color: var(--amber); }
+.tag-bug   { background: var(--red-l);   color: var(--red); }
+.tag-pri   { background: #fdf0ee;        color: #c0392b; }
+.task-pri-dot { width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:6px; }
+.pri-high  { background: var(--red); }
+.pri-mid   { background: var(--amber); }
+.pri-low   { background: var(--green); }
+
+.task-actions { opacity:0; transition:opacity .15s; flex-shrink:0; display:flex; gap:4px; }
+.task-item:hover .task-actions { opacity:1; }
+.task-btn {
+  width:26px;height:26px;border-radius:6px;border:none;
+  background:var(--s2);color:var(--muted);font-size:.75rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.task-btn:hover { background:var(--border); color:var(--text); }
+.task-btn.del:hover { background:var(--red-l); color:var(--red); }
+
+/* ── Add task form ── */
+.add-form {
+  display: flex; gap: 8px; padding-top: 14px;
+  border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.add-input {
+  flex:1; min-width:140px;
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 8px 12px;
+  font-family: 'Epilogue', sans-serif; font-size: .88rem; color: var(--text);
+  outline: none; transition: border-color .15s;
+}
+.add-input:focus { border-color: var(--text); background: #fff; }
+.add-input::placeholder { color: var(--muted); }
+.add-select {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 8px 10px;
+  font-family: 'Epilogue', sans-serif; font-size: .82rem; color: var(--text);
+  outline: none; cursor: pointer;
+}
+.add-btn-main {
+  background: var(--text); color: #fff;
+  border: none; border-radius: 7px; padding: 8px 16px;
+  font-family: 'Epilogue', sans-serif; font-size: .85rem; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+  white-space: nowrap;
+}
+.add-btn-main:hover { opacity: .85; }
+
+/* ── Milestone ── */
+.milestone-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.milestone-item:last-child { border-bottom: none; }
+.milestone-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .8rem; flex-shrink: 0;
+}
+.milestone-item.done .milestone-dot { border-color: var(--green); background: var(--green-l); }
+.milestone-item.active .milestone-dot { border-color: var(--text); background: var(--s2); }
+.milestone-content { flex:1; }
+.milestone-name { font-size: .88rem; font-weight: 600; }
+.milestone-item.done .milestone-name { color: var(--muted); }
+.milestone-target { font-size: .75rem; color: var(--muted); }
+
+/* ── Revenue goal hero ── */
+.revenue-hero {
+  background: var(--text);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 28px 28px 24px;
+  margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.revenue-hero::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.04);
+}
+.revenue-hero-label { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.45); margin-bottom: 8px; font-weight: 600; }
+.revenue-hero-val {
+  font-family: 'DM Serif Display', serif;
+  font-size: 3rem; line-height: 1; color: #fff;
+}
+.revenue-hero-goal { font-size: .85rem; color: rgba(255,255,255,.4); margin-top: 6px; }
+.revenue-hero-bar {
+  margin-top: 20px; height: 8px;
+  background: rgba(255,255,255,.12); border-radius: 99px; overflow: hidden;
+}
+.revenue-hero-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, #f0b429, #fff);
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+.revenue-hero-pct {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .78rem; color: rgba(255,255,255,.5); margin-top: 8px;
+}
+
+/* ── Canvas chart ── */
+canvas.linechart { width:100%; height:140px; display:block; }
+.chart-empty { text-align:center; padding:40px 0; color:var(--muted); font-size:.82rem; }
+
+/* ── Log entries ── */
+.log-entry {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .82rem;
+  animation: fadeIn .2s ease;
+}
+.log-entry:last-child { border-bottom: none; }
+.log-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px; }
+.log-dot.rev  { background: var(--green); }
+.log-dot.user { background: var(--blue); }
+.log-dot.dev  { background: var(--muted); }
+.log-text { flex:1; color:var(--text); line-height:1.5; }
+.log-date { font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--muted); flex-shrink:0; margin-top:2px; }
+
+/* ── Badges ── */
+.badge {
+  display:inline-flex;align-items:center;
+  font-size:.68rem;font-weight:600;letter-spacing:.06em;
+  padding:2px 8px;border-radius:4px;text-transform:uppercase;
+}
+.badge-green { background:var(--green-l);color:var(--green); }
+.badge-amber { background:var(--amber-l);color:var(--amber); }
+.badge-red   { background:var(--red-l);color:var(--red); }
+.badge-blue  { background:var(--blue-l);color:var(--blue); }
+
+/* ── Notes ── */
+.note-area {
+  width:100%;min-height:120px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:7px;padding:12px;
+  font-family:'Epilogue',sans-serif;font-size:.88rem;
+  color:var(--text);resize:vertical;outline:none;
+  transition:border-color .15s;line-height:1.6;
+}
+.note-area:focus { border-color:var(--text); background:#fff; }
+
+/* ── Toast ── */
+#toast {
+  position:fixed;bottom:24px;right:24px;
+  background:var(--text);color:#fff;
+  font-size:.82rem;font-weight:500;
+  padding:10px 18px;border-radius:8px;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .25s,transform .25s;
+  pointer-events:none;z-index:999;
+}
+#toast.show { opacity:1;transform:none; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border);border-radius:99px; }
+
+/* ── Mobile ── */
+@media(max-width:640px){
+  .sidebar { width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:12px 0; }
+  .sidebar-logo { padding:8px 16px 8px;border-bottom:none;border-right:1px solid rgba(255,255,255,.1);margin-bottom:0; }
+  .sidebar-logo h2 { font-size:1rem; }
+  .nav-group { display:flex;gap:2px;margin:0;padding:4px 8px; }
+  .nav-group-label { display:none; }
+  .nav-item { padding:7px 10px;font-size:.78rem;border-left:none;border-bottom:2px solid transparent; }
+  .nav-item.active { border-bottom-color:#fff;border-left-color:transparent; }
+  .sidebar-bottom { display:none; }
+  .layout { flex-direction:column; }
+  .main { margin-left:0;padding:20px 14px 60px; }
+  .kpi-grid { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <h2>Founder OS</h2>
+    <p>Startup Dashboard</p>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">Overview</div>
+    <div class="nav-item active" onclick="goTo('overview')"><span class="nav-icon">◈</span> Overview</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">Build</div>
+    <div class="nav-item" onclick="goTo('dev')"><span class="nav-icon">⌥</span> Development</div>
+    <div class="nav-item" onclick="goTo('bugs')"><span class="nav-icon">◉</span> Bugs & Issues</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">Grow</div>
+    <div class="nav-item" onclick="goTo('business')"><span class="nav-icon">▲</span> Business</div>
+    <div class="nav-item" onclick="goTo('marketing')"><span class="nav-icon">◎</span> Marketing</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-group-label">Track</div>
+    <div class="nav-item" onclick="goTo('revenue')"><span class="nav-icon">$</span> Revenue</div>
+    <div class="nav-item" onclick="goTo('log')"><span class="nav-icon">≡</span> Activity Log</div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="sidebar-date" id="sideDate"></div>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- ════ OVERVIEW ════ -->
+  <div class="page active" id="page-overview">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Good morning, Founder.</div>
+        <div class="page-sub">Here's where you stand today.</div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <!-- Revenue hero -->
+    <div class="revenue-hero">
+      <div class="revenue-hero-label">Revenue Goal — Road to $1,000,000</div>
+      <div class="revenue-hero-val" id="ov-rev-val">$0</div>
+      <div class="revenue-hero-goal">Goal: $1,000,000</div>
+      <div class="revenue-hero-bar"><div class="revenue-hero-fill" id="ov-rev-fill" style="width:0%"></div></div>
+      <div class="revenue-hero-pct" id="ov-rev-pct">0% of goal</div>
+    </div>
+
+    <div class="two-col">
+      <!-- Top tasks -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Priority Tasks</span>
+          <span class="card-action" onclick="goTo('dev')">See all →</span>
+        </div>
+        <div class="card-body" id="ov-priority-tasks"></div>
+      </div>
+
+      <!-- Milestones -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Milestones</span>
+          <span class="card-action" onclick="goTo('revenue')">Revenue →</span>
+        </div>
+        <div class="card-body" id="ov-milestones"></div>
+      </div>
+    </div>
+
+    <!-- Progress bars -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header"><span class="card-title">Sprint Progress</span></div>
+      <div class="card-body" id="ov-progress"></div>
+    </div>
+  </div>
+
+  <!-- ════ DEVELOPMENT ════ -->
+  <div class="page" id="page-dev">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Development</div>
+        <div class="page-sub">Features, tasks & sprints</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><span class="card-title">Tasks</span><span class="card-action" onclick="filterTasks('dev','all')">All</span></div>
+      <div class="card-body">
+        <div id="dev-list"></div>
+        <div class="add-form">
+          <input class="add-input" id="dev-inp" placeholder="New feature or task…" onkeydown="if(event.key==='Enter')addTask('dev')"/>
+          <select class="add-select" id="dev-pri">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Mid</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn-main" onclick="addTask('dev')">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Feature Progress</span></div>
+      <div class="card-body" id="dev-progress"></div>
+    </div>
+  </div>
+
+  <!-- ════ BUGS ════ -->
+  <div class="page" id="page-bugs">
+    <div class="page-header">
+      <div><div class="page-title">Bugs & Issues</div><div class="page-sub">Track, fix, ship</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Open Issues</span></div>
+      <div class="card-body">
+        <div id="bug-list"></div>
+        <div class="add-form">
+          <input class="add-input" id="bug-inp" placeholder="Describe the bug…" onkeydown="if(event.key==='Enter')addTask('bug')"/>
+          <select class="add-select" id="bug-pri">
+            <option value="high">🔴 Critical</option>
+            <option value="mid" selected>🟡 Minor</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn-main" onclick="addTask('bug')">+ Log Bug</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ BUSINESS ════ -->
+  <div class="page" id="page-business">
+    <div class="page-header">
+      <div><div class="page-title">Business</div><div class="page-sub">Operations, sales & strategy</div></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">MRR</div>
+        <div class="kpi-value" id="kpi-mrr-v">$0</div>
+        <div class="kpi-edit-wrap">
+          <input class="kpi-input" id="kpi-mrr-inp" placeholder="0" type="number" min="0"/>
+          <button class="kpi-save-btn" onclick="saveKpi('mrr')">Save</button>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Total Users</div>
+        <div class="kpi-value" id="kpi-users-v">0</div>
+        <div class="kpi-edit-wrap">
+          <input class="kpi-input" id="kpi-users-inp" placeholder="0" type="number" min="0"/>
+          <button class="kpi-save-btn" onclick="saveKpi('users')">Save</button>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Paying Customers</div>
+        <div class="kpi-value" id="kpi-paying-v">0</div>
+        <div class="kpi-edit-wrap">
+          <input class="kpi-input" id="kpi-paying-inp" placeholder="0" type="number" min="0"/>
+          <button class="kpi-save-btn" onclick="saveKpi('paying')">Save</button>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-value" id="kpi-rev-v">$0</div>
+        <div class="kpi-edit-wrap">
+          <input class="kpi-input" id="kpi-rev-inp" placeholder="0" type="number" min="0"/>
+          <button class="kpi-save-btn" onclick="saveKpi('rev')">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><span class="card-title">Business Tasks</span></div>
+      <div class="card-body">
+        <div id="biz-list"></div>
+        <div class="add-form">
+          <input class="add-input" id="biz-inp" placeholder="Sales call, investor meeting, partnership…" onkeydown="if(event.key==='Enter')addTask('biz')"/>
+          <select class="add-select" id="biz-pri">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Mid</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn-main" onclick="addTask('biz')">+ Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Weekly Focus Note</span></div>
+      <div class="card-body">
+        <textarea class="note-area" id="biz-note" placeholder="What's the most important business thing to do this week?…" oninput="saveNote('biz')"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ MARKETING ════ -->
+  <div class="page" id="page-marketing">
+    <div class="page-header">
+      <div><div class="page-title">Marketing</div><div class="page-sub">Growth, content & outreach</div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><span class="card-title">Marketing Tasks</span></div>
+      <div class="card-body">
+        <div id="mkt-list"></div>
+        <div class="add-form">
+          <input class="add-input" id="mkt-inp" placeholder="Social post, cold email, SEO article…" onkeydown="if(event.key==='Enter')addTask('mkt')"/>
+          <select class="add-select" id="mkt-pri">
+            <option value="high">🔴 High</option>
+            <option value="mid" selected>🟡 Mid</option>
+            <option value="low">🟢 Low</option>
+          </select>
+          <button class="add-btn-main" onclick="addTask('mkt')">+ Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Content & Growth Note</span></div>
+      <div class="card-body">
+        <textarea class="note-area" id="mkt-note" placeholder="Content calendar, channel strategy, growth experiments…" oninput="saveNote('mkt')"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ REVENUE ════ -->
+  <div class="page" id="page-revenue">
+    <div class="page-header">
+      <div><div class="page-title">Revenue</div><div class="page-sub">Road to $1,000,000</div></div>
+    </div>
+
+    <div class="revenue-hero">
+      <div class="revenue-hero-label">Total Revenue Earned</div>
+      <div class="revenue-hero-val" id="rev-hero-val">$0</div>
+      <div class="revenue-hero-goal">Goal: $1,000,000</div>
+      <div class="revenue-hero-bar"><div class="revenue-hero-fill" id="rev-hero-fill" style="width:0%"></div></div>
+      <div class="revenue-hero-pct" id="rev-hero-pct">0% of the million</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Revenue Milestones</span></div>
+        <div class="card-body" id="milestones-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Revenue Chart</span></div>
+        <div class="card-body" style="padding:12px 16px">
+          <canvas class="linechart" id="revChart" height="140"></canvas>
+          <div class="chart-empty" id="revChartEmpty">Log revenue entries to see chart</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log revenue entry -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Log Revenue Entry</span></div>
+      <div class="card-body">
+        <div class="add-form">
+          <input class="add-input" id="rev-inp" placeholder="Description (e.g. First paying customer)" style="flex:2"/>
+          <input class="add-input" id="rev-amt" placeholder="Amount $" type="number" min="0" style="flex:1;min-width:100px"/>
+          <button class="add-btn-main" onclick="addRevEntry()">+ Log</button>
+        </div>
+        <div id="rev-entries" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ LOG ════ -->
+  <div class="page" id="page-log">
+    <div class="page-header">
+      <div><div class="page-title">Activity Log</div><div class="page-sub">Everything you've done</div></div>
+    </div>
+    <div class="card">
+      <div class="card-body" id="activity-log">
+        <div class="chart-empty">No activity yet. Start working! 🚀</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+const KEY = 'founderOS_v1';
+let S = {
+  kpis: { mrr:0, users:0, paying:0, rev:0 },
+  tasks: [],        // {id, type, text, priority, done, createdAt}
+  revEntries: [],   // {id, desc, amount, date}
+  notes: { biz:'', mkt:'' },
+  log: []           // {type, text, date}
+};
+
+function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const d = localStorage.getItem(KEY);
+    if(d){ const p=JSON.parse(d); S={...S,...p}; }
+  }catch(e){}
+}
+
+/* ════════════════════════════════
+   NAVIGATION
+════════════════════════════════ */
+let currentPage = 'overview';
+function goTo(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')===`goTo('${page}')`) n.classList.add('active');
+  });
+  currentPage = page;
+  render();
+}
+
+/* ════════════════════════════════
+   TASKS
+════════════════════════════════ */
+function addTask(type){
+  const inp = document.getElementById(type+'-inp') || document.getElementById('biz-inp');
+  const priEl = document.getElementById(type+'-pri') || document.getElementById('biz-pri');
+  if(!inp || !inp.value.trim()) return;
+  const task = { id:genId(), type, text:inp.value.trim(), priority: priEl?priEl.value:'mid', done:false, createdAt:Date.now() };
+  S.tasks.push(task);
+  logActivity(type, `Added task: "${task.text}"`);
+  save(); render();
+  inp.value=''; inp.focus();
+  toast('Task added');
+}
+
+function toggleTask(id){
+  const t = S.tasks.find(t=>t.id===id);
+  if(!t) return;
+  t.done = !t.done;
+  if(t.done) logActivity(t.type, `Completed: "${t.text}"`);
+  save(); render();
+  if(t.done) toast('✓ Done!');
+}
+
+function deleteTask(id){
+  const t = S.tasks.find(t=>t.id===id);
+  if(t) logActivity(t.type, `Removed: "${t.text}"`);
+  S.tasks = S.tasks.filter(t=>t.id!==id);
+  save(); render(); toast('Removed');
+}
+
+function renderTaskList(containerId, type){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const tasks = S.tasks.filter(t=>t.type===type);
+  if(!tasks.length){
+    el.innerHTML='<div class="chart-empty">No tasks yet. Add one below.</div>'; return;
+  }
+  el.innerHTML='';
+  // sort: undone first, then by priority
+  const priOrder={high:0,mid:1,low:2};
+  [...tasks].sort((a,b)=>a.done-b.done || priOrder[a.priority]-priOrder[b.priority])
+  .forEach(t=>{
+    const div=document.createElement('div');
+    div.className='task-item'+(t.done?' done':'');
+    const tagMap={dev:'dev',bug:'bug',biz:'biz',mkt:'mkt'};
+    const tagLbl={dev:'Feature',bug:'Bug',biz:'Business',mkt:'Marketing'};
+    div.innerHTML=`
+      <div class="task-pri-dot pri-${t.priority}"></div>
+      <div class="task-check" onclick="toggleTask('${t.id}')"></div>
+      <div class="task-content">
+        <div class="task-text">${escHtml(t.text)}</div>
+        <div class="task-meta">
+          <span class="task-tag tag-${tagMap[t.type]}">${tagLbl[t.type]}</span>
+          <span class="task-tag tag-pri">${t.priority}</span>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="task-btn del" onclick="deleteTask('${t.id}')">✕</button>
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* ════════════════════════════════
+   KPIs
+════════════════════════════════ */
+function saveKpi(key){
+  const inpMap={mrr:'kpi-mrr-inp',users:'kpi-users-inp',paying:'kpi-paying-inp',rev:'kpi-rev-inp'};
+  const inp = document.getElementById(inpMap[key]);
+  if(!inp) return;
+  const val = parseFloat(inp.value)||0;
+  S.kpis[key]=val;
+  if(key==='rev') logActivity('rev', `Revenue updated to $${fmt(val)}`);
+  save(); render(); toast('Saved ✓');
+}
+
+function fmt(n){ return n>=1000000?(n/1000000).toFixed(2)+'M':n>=1000?(n/1000).toFixed(1)+'K':n.toString(); }
+function fmtUSD(n){ return '$'+fmt(n); }
+
+/* ════════════════════════════════
+   REVENUE
+════════════════════════════════ */
+function addRevEntry(){
+  const desc = document.getElementById('rev-inp').value.trim();
+  const amt  = parseFloat(document.getElementById('rev-amt').value)||0;
+  if(!desc||!amt) return;
+  S.revEntries.push({id:genId(),desc,amount:amt,date:Date.now()});
+  S.kpis.rev = S.revEntries.reduce((a,e)=>a+e.amount,0);
+  logActivity('rev',`Revenue logged: "${desc}" +$${fmt(amt)}`);
+  save(); render();
+  document.getElementById('rev-inp').value='';
+  document.getElementById('rev-amt').value='';
+  toast('💰 Revenue logged!');
+}
+
+function renderRevEntries(){
+  const el = document.getElementById('rev-entries');
+  if(!el) return;
+  if(!S.revEntries.length){ el.innerHTML='<div class="chart-empty">No entries yet</div>'; return; }
+  el.innerHTML='';
+  [...S.revEntries].reverse().forEach(e=>{
+    const div=document.createElement('div');
+    div.className='log-entry';
+    div.innerHTML=`
+      <div class="log-dot rev"></div>
+      <div class="log-text"><strong>+$${fmt(e.amount)}</strong> — ${escHtml(e.desc)}</div>
+      <div class="log-date">${new Date(e.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+const MILESTONES = [
+  {label:'First Dollar',    target:1},
+  {label:'$100',            target:100},
+  {label:'$1,000',          target:1000},
+  {label:'$10,000',         target:10000},
+  {label:'$100K',           target:100000},
+  {label:'$500K',           target:500000},
+  {label:'$1,000,000 🏆',   target:1000000},
+];
+
+function renderMilestones(containerId){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  const rev=S.kpis.rev||0;
+  el.innerHTML='';
+  MILESTONES.forEach((m,i)=>{
+    const done = rev>=m.target;
+    const isNext = !done && (i===0 || rev>=MILESTONES[i-1].target);
+    const div=document.createElement('div');
+    div.className='milestone-item'+(done?' done':isNext?' active':'');
+    div.innerHTML=`
+      <div class="milestone-dot">${done?'✓':isNext?'→':'○'}</div>
+      <div class="milestone-content">
+        <div class="milestone-name">${m.label}</div>
+        <div class="milestone-target">${done?'Achieved!':isNext?'Next target':'$'+fmt(m.target)}</div>
+      </div>
+      ${done?'<span class="badge badge-green">Done</span>':isNext?'<span class="badge badge-amber">Active</span>':''}
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* ════════════════════════════════
+   CHARTS
+════════════════════════════════ */
+function drawRevChart(){
+  const canvas=document.getElementById('revChart');
+  const empty=document.getElementById('revChartEmpty');
+  if(!canvas) return;
+  if(S.revEntries.length<1){ canvas.style.display='none'; if(empty)empty.style.display='block'; return; }
+  canvas.style.display='block'; if(empty)empty.style.display='none';
+
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth||300, H=140;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+
+  ctx.fillStyle='#f0efe9'; ctx.fillRect(0,0,W,H);
+
+  // cumulative data
+  let cum=0;
+  const pts=S.revEntries.map(e=>{ cum+=e.amount; return cum; });
+  const n=pts.length;
+  const maxV=Math.max(...pts,1);
+  const pad={t:16,r:16,b:28,l:52};
+  const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+
+  const xOf=i=>pad.l+(n<2?cw/2:(i/(n-1))*cw);
+  const yOf=v=>pad.t+ch-(v/maxV)*ch;
+
+  // grid
+  ctx.strokeStyle='rgba(0,0,0,.06)'; ctx.lineWidth=1;
+  for(let g=0;g<=3;g++){
+    const y=pad.t+(g/3)*ch;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+    ctx.fillStyle='rgba(0,0,0,.35)'; ctx.font='9px Epilogue'; ctx.textAlign='right';
+    ctx.fillText('$'+fmt(maxV*(1-g/3)),pad.l-4,y+3);
+  }
+
+  // area
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+ch);
+  grad.addColorStop(0,'rgba(26,127,90,.25)');
+  grad.addColorStop(1,'rgba(26,127,90,.02)');
+  ctx.beginPath();
+  ctx.moveTo(xOf(0),yOf(pts[0]));
+  for(let i=1;i<n;i++) ctx.lineTo(xOf(i),yOf(pts[i]));
+  ctx.lineTo(xOf(n-1),pad.t+ch); ctx.lineTo(xOf(0),pad.t+ch);
+  ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+
+  // line
+  ctx.beginPath(); ctx.strokeStyle='#1a7f5a'; ctx.lineWidth=2; ctx.lineJoin='round';
+  ctx.moveTo(xOf(0),yOf(pts[0]));
+  for(let i=1;i<n;i++) ctx.lineTo(xOf(i),yOf(pts[i]));
+  ctx.stroke();
+
+  // dots
+  pts.forEach((v,i)=>{
+    ctx.beginPath(); ctx.arc(xOf(i),yOf(v),3.5,0,Math.PI*2);
+    ctx.fillStyle='#1a7f5a'; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+  });
+
+  // x labels
+  ctx.fillStyle='rgba(0,0,0,.35)'; ctx.font='9px Epilogue'; ctx.textAlign='center';
+  const step=Math.max(1,Math.floor(n/5));
+  for(let i=0;i<n;i+=step) ctx.fillText('#'+(i+1),xOf(i),H-8);
+}
+
+/* ════════════════════════════════
+   NOTES
+════════════════════════════════ */
+function saveNote(key){
+  const el=document.getElementById(key+'-note');
+  if(!el) return;
+  S.notes[key]=el.value;
+  save();
+}
+
+/* ════════════════════════════════
+   ACTIVITY LOG
+════════════════════════════════ */
+function logActivity(type,text){
+  S.log.unshift({type,text,date:Date.now()});
+  if(S.log.length>200) S.log=S.log.slice(0,200);
+}
+
+function renderLog(){
+  const el=document.getElementById('activity-log');
+  if(!el) return;
+  if(!S.log.length){ el.innerHTML='<div class="chart-empty">No activity yet. Start working! 🚀</div>'; return; }
+  el.innerHTML='';
+  S.log.forEach(e=>{
+    const div=document.createElement('div');
+    div.className='log-entry';
+    const dotClass={dev:'dev',bug:'dev',biz:'user',mkt:'user',rev:'rev'}[e.type]||'dev';
+    div.innerHTML=`
+      <div class="log-dot ${dotClass}"></div>
+      <div class="log-text">${escHtml(e.text)}</div>
+      <div class="log-date">${new Date(e.date).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* ════════════════════════════════
+   OVERVIEW
+════════════════════════════════ */
+function renderKpiGrid(){
+  const el=document.getElementById('kpi-grid');
+  if(!el) return;
+  const rev=S.kpis.rev||0;
+  const pct=(rev/1000000*100).toFixed(2);
+  el.innerHTML=`
+    <div class="kpi"><div class="kpi-label">MRR</div><div class="kpi-value">${fmtUSD(S.kpis.mrr)}</div><div class="kpi-sub">Monthly Recurring Revenue</div></div>
+    <div class="kpi"><div class="kpi-label">Total Users</div><div class="kpi-value">${fmt(S.kpis.users)}</div><div class="kpi-sub">Signed up</div></div>
+    <div class="kpi"><div class="kpi-label">Paying</div><div class="kpi-value">${fmt(S.kpis.paying)}</div><div class="kpi-sub">Customers</div></div>
+    <div class="kpi"><div class="kpi-label">Revenue</div><div class="kpi-value">${fmtUSD(rev)}</div><div class="kpi-sub">${pct}% of $1M goal</div></div>
+  `;
+}
+
+function renderOvPriority(){
+  const el=document.getElementById('ov-priority-tasks');
+  if(!el) return;
+  const priOrder={high:0,mid:1,low:2};
+  const top = S.tasks.filter(t=>!t.done).sort((a,b)=>priOrder[a.priority]-priOrder[b.priority]).slice(0,5);
+  if(!top.length){ el.innerHTML='<div class="chart-empty">No open tasks. You\'re crushing it!</div>'; return; }
+  el.innerHTML='';
+  top.forEach(t=>{
+    const div=document.createElement('div');
+    div.className='task-item'+(t.done?' done':'');
+    div.innerHTML=`
+      <div class="task-pri-dot pri-${t.priority}"></div>
+      <div class="task-check" onclick="toggleTask('${t.id}')"></div>
+      <div class="task-content"><div class="task-text">${escHtml(t.text)}</div></div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function renderOvProgress(){
+  const el=document.getElementById('ov-progress');
+  if(!el) return;
+  const types=[
+    {key:'dev',label:'Development',color:'blue'},
+    {key:'bug',label:'Bugs Fixed',color:'green'},
+    {key:'biz',label:'Business',color:'amber'},
+    {key:'mkt',label:'Marketing',color:'gold'},
+  ];
+  el.innerHTML='';
+  types.forEach(tp=>{
+    const all=S.tasks.filter(t=>t.type===tp.key);
+    const done=all.filter(t=>t.done).length;
+    const pct=all.length?Math.round(done/all.length*100):0;
+    const div=document.createElement('div');
+    div.className='prog-row';
+    div.innerHTML=`
+      <div class="prog-header">
+        <span class="prog-label">${tp.label}</span>
+        <span class="prog-val">${done}/${all.length} · ${pct}%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill ${tp.color}" style="width:${pct}%"></div></div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function renderRevHero(valId,fillId,pctId){
+  const rev=S.kpis.rev||0;
+  const pct=Math.min(100,rev/1000000*100);
+  const el=document.getElementById(valId);
+  const fill=document.getElementById(fillId);
+  const pctEl=document.getElementById(pctId);
+  if(el) el.textContent=fmtUSD(rev);
+  if(fill) fill.style.width=pct.toFixed(4)+'%';
+  if(pctEl) pctEl.textContent=pct.toFixed(4)+'% of the million';
+}
+
+function renderDevProgress(){
+  const el=document.getElementById('dev-progress');
+  if(!el) return;
+  const pris=['high','mid','low'];
+  const labels={high:'High Priority',mid:'Medium Priority',low:'Low Priority'};
+  const colors={high:'amber',mid:'blue',low:'green'};
+  el.innerHTML='';
+  pris.forEach(p=>{
+    const all=S.tasks.filter(t=>t.type==='dev'&&t.priority===p);
+    const done=all.filter(t=>t.done).length;
+    const pct=all.length?Math.round(done/all.length*100):0;
+    const div=document.createElement('div');
+    div.className='prog-row';
+    div.innerHTML=`
+      <div class="prog-header">
+        <span class="prog-label">${labels[p]}</span>
+        <span class="prog-val">${done}/${all.length} · ${pct}%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill ${colors[p]}" style="width:${pct}%"></div></div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* ════════════════════════════════
+   MAIN RENDER
+════════════════════════════════ */
+function render(){
+  // Sidebar date
+  const sd=document.getElementById('sideDate');
+  if(sd) sd.textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+  renderKpiGrid();
+  renderOvPriority();
+  renderMilestones('ov-milestones');
+  renderOvProgress();
+  renderRevHero('ov-rev-val','ov-rev-fill','ov-rev-pct');
+  renderRevHero('rev-hero-val','rev-hero-fill','rev-hero-pct');
+  renderTaskList('dev-list','dev');
+  renderTaskList('bug-list','bug');
+  renderTaskList('biz-list','biz');
+  renderTaskList('mkt-list','mkt');
+  renderRevEntries();
+  renderMilestones('milestones-list');
+  renderDevProgress();
+  renderLog();
+  drawRevChart();
+
+  // KPI inputs
+  const kpiMap={mrr:'kpi-mrr-inp',users:'kpi-users-inp',paying:'kpi-paying-inp',rev:'kpi-rev-inp'};
+  const kpiVal={mrr:'kpi-mrr-v',users:'kpi-users-v',paying:'kpi-paying-v',rev:'kpi-rev-v'};
+  Object.entries(S.kpis).forEach(([k,v])=>{
+    const inp=document.getElementById(kpiMap[k]);
+    const vel=document.getElementById(kpiVal[k]);
+    if(inp&&!inp.value) inp.placeholder=v;
+    if(vel) vel.textContent=(k==='mrr'||k==='rev')?fmtUSD(v):fmt(v);
+  });
+
+  // Notes
+  ['biz','mkt'].forEach(k=>{
+    const el=document.getElementById(k+'-note');
+    if(el&&!el.value) el.value=S.notes[k]||'';
+  });
+}
+
+/* ════════════════════════════════
+   UTILS
+════════════════════════════════ */
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+let toastT;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+window.addEventListener('resize',()=>drawRevChart());
+
+/* ════════════════════════════════
+   SEED & INIT
+════════════════════════════════ */
+load();
+
+if(!S.tasks.length){
+  const seeds=[
+    {type:'dev',text:'Set up project repo and CI/CD pipeline',priority:'high'},
+    {type:'dev',text:'Build user authentication flow',priority:'high'},
+    {type:'dev',text:'Design onboarding UX',priority:'mid'},
+    {type:'dev',text:'Implement core feature MVP',priority:'high'},
+    {type:'bug',text:'Fix mobile layout on iOS Safari',priority:'mid'},
+    {type:'biz',text:'Define pricing strategy',priority:'high'},
+    {type:'biz',text:'Research 5 direct competitors',priority:'mid'},
+    {type:'biz',text:'Set up Stripe payments',priority:'high'},
+    {type:'mkt',text:'Launch landing page',priority:'high'},
+    {type:'mkt',text:'Post on LinkedIn & Twitter daily for 30 days',priority:'mid'},
+    {type:'mkt',text:'Record first product demo video',priority:'mid'},
+  ];
+  seeds.forEach(s=>S.tasks.push({id:genId(),...s,done:false,createdAt:Date.now()}));
+  save();
+}
+
+render();
+</script>
+</body>
+</html>
