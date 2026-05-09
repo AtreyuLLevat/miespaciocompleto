@@ -1,7 +1,7 @@
 {
   "name": "Mi Espacio Personal",
   "short_name": "Mi Espacio",
-  "description": "Dashboard personal — Vida Diaria y Startup OS",
+  "description": "Dashboard personal — Vida Diaria, Startup OS y Academia",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f8f7f4",
@@ -33,6 +33,11 @@
       "name": "Startup OS",
       "short_name": "Startup",
       "url": "./startup-dashboard.html"
+    },
+    {
+      "name": "Academia",
+      "short_name": "Academia",
+      "url": "./academic-dashboard.html"
     }
   ]
 }
