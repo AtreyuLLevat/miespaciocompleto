@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Academia</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#1c1b19"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f8f7f4;
+  --surface:  #ffffff;
+  --s2:       #f1f0ec;
+  --border:   #e5e3db;
+  --text:     #1c1b19;
+  --muted:    #8c8a83;
+  --accent:   #2c5f8a;   /* blue — academic tone */
+  --accent-l: #eaf2f9;
+  --green:    #3d6b4f;
+  --green-l:  #eaf2ed;
+  --warm:     #c4622d;
+  --warm-l:   #fdf0e8;
+  --gold:     #9a6f1e;
+  --gold-l:   #fdf5e0;
+  --radius:   12px;
+  --sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 12px rgba(0,0,0,.06);
+  --sh-m:     0 2px 8px rgba(0,0,0,.07), 0 8px 24px rgba(0,0,0,.06);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Layout ── */
+.layout { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 230px; flex-shrink: 0;
+  background: var(--text);
+  color: #fff;
+  display: flex; flex-direction: column;
+  padding: 30px 0;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 0 24px 26px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: 22px;
+}
+.sidebar-logo h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem; letter-spacing: -.01em; color: #fff;
+}
+.sidebar-logo p {
+  font-size: .7rem; color: rgba(255,255,255,.35);
+  margin-top: 3px; letter-spacing: .08em; text-transform: uppercase;
+}
+.nav-section { margin-bottom: 22px; }
+.nav-section-label {
+  font-size: .62rem; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.28);
+  padding: 0 24px 8px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 24px;
+  font-size: .83rem; color: rgba(255,255,255,.55);
+  cursor: pointer; border: none; background: none;
+  width: 100%; text-align: left;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+  border-radius: 0;
+}
+.nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+.nav-item.active { background: rgba(255,255,255,.1); color: #fff; font-weight: 500; }
+.nav-item .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-spacer { flex: 1; }
+.sidebar-back {
+  padding: 18px 24px 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.sidebar-back a {
+  font-size: .75rem; color: rgba(255,255,255,.35);
+  text-decoration: none; display: flex; align-items: center; gap: 6px;
+  transition: color .15s;
+}
+.sidebar-back a:hover { color: rgba(255,255,255,.7); }
+
+/* ── Main ── */
+.main {
+  margin-left: 230px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  padding: 28px 36px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.header-left h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem; letter-spacing: -.02em;
+  line-height: 1.1;
+}
+.header-left p {
+  font-size: .82rem; color: var(--muted); margin-top: 4px;
+}
+.header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: .8rem; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { background: var(--s2); }
+.btn-primary {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.btn-primary:hover { background: #245080; border-color: #245080; }
+
+/* ── Content ── */
+.content {
+  padding: 24px 36px 40px;
+  flex: 1;
+}
+
+/* ── Section title ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; letter-spacing: -.01em;
+}
+.section-meta {
+  font-size: .75rem; color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── Stat cards ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--sh);
+}
+.stat-label {
+  font-size: .68rem; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 8px;
+}
+.stat-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.7rem; font-weight: 500; letter-spacing: -.02em;
+  color: var(--text); line-height: 1;
+}
+.stat-sub { font-size: .72rem; color: var(--muted); margin-top: 5px; }
+.stat-accent { color: var(--accent); }
+.stat-green  { color: var(--green); }
+.stat-warm   { color: var(--warm); }
+.stat-gold   { color: var(--gold); }
+
+/* ── Two-col layout ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* ── Panel ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  box-shadow: var(--sh);
+}
+.panel-title {
+  font-size: .72rem; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 16px;
+}
+
+/* ── Subjects list ── */
+.subjects-list { display: flex; flex-direction: column; gap: 10px; }
+.subject-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+.subject-item:hover { background: var(--s2); box-shadow: var(--sh); }
+.subject-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.subject-name { font-weight: 500; font-size: .88rem; flex: 1; }
+.subject-type {
+  font-size: .65rem; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted);
+}
+.subject-grade {
+  font-family: 'DM Mono', monospace;
+  font-size: .85rem; font-weight: 500;
+  min-width: 36px; text-align: right;
+}
+.subject-actions {
+  display: flex; gap: 6px;
+  opacity: 0; transition: opacity .15s;
+}
+.subject-item:hover .subject-actions { opacity: 1; }
+.icon-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: .85rem; padding: 2px 4px;
+  color: var(--muted); border-radius: 4px;
+  transition: background .15s;
+}
+.icon-btn:hover { background: var(--border); }
+
+/* ── Progress bar ── */
+.progress-bar-wrap { margin-top: 6px; }
+.progress-bar {
+  height: 4px; background: var(--border);
+  border-radius: 99px; overflow: hidden;
+  margin-top: 6px;
+}
+.progress-fill {
+  height: 100%; border-radius: 99px;
+  background: var(--accent);
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Study timer ── */
+.timer-display {
+  text-align: center;
+  padding: 10px 0 18px;
+}
+.timer-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 3rem; font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--text); line-height: 1;
+}
+.timer-subject-label {
+  font-size: .78rem; color: var(--muted); margin-top: 6px;
+}
+.timer-controls {
+  display: flex; gap: 8px; justify-content: center;
+  margin-top: 16px;
+}
+.timer-bar-wrap {
+  margin: 16px 0 4px;
+}
+.timer-sessions {
+  display: flex; gap: 5px; justify-content: center;
+  margin-top: 12px; flex-wrap: wrap;
+}
+.session-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border);
+  transition: background .3s;
+}
+.session-dot.done { background: var(--accent); }
+.session-dot.current { background: var(--warm); }
+
+/* ── Assignments ── */
+.assignments-list { display: flex; flex-direction: column; gap: 8px; }
+.assign-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  transition: background .15s;
+}
+.assign-item.done-item { opacity: .5; }
+.assign-check {
+  width: 18px; height: 18px; border-radius: 5px;
+  border: 2px solid var(--border);
+  cursor: pointer; flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; color: transparent;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.assign-item.done-item .assign-check {
+  background: var(--green); border-color: var(--green); color: #fff;
+}
+.assign-info { flex: 1; min-width: 0; }
+.assign-title {
+  font-size: .85rem; font-weight: 500; line-height: 1.3;
+}
+.assign-item.done-item .assign-title { text-decoration: line-through; }
+.assign-meta {
+  display: flex; gap: 8px; align-items: center;
+  margin-top: 3px; flex-wrap: wrap;
+}
+.assign-subject {
+  font-size: .65rem; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--muted);
+}
+.assign-due {
+  font-family: 'DM Mono', monospace;
+  font-size: .68rem;
+}
+.due-soon { color: var(--warm); font-weight: 600; }
+.due-ok   { color: var(--muted); }
+.due-past { color: #d0302a; font-weight: 600; }
+.assign-del {
+  background: none; border: none; cursor: pointer;
+  font-size: .8rem; color: var(--muted); padding: 2px 4px;
+  border-radius: 4px; opacity: 0; transition: opacity .15s, background .15s;
+  flex-shrink: 0;
+}
+.assign-item:hover .assign-del { opacity: 1; }
+.assign-del:hover { background: #fdecea; color: #c0392b; }
+
+/* ── Grade rows ── */
+.grade-list { display: flex; flex-direction: column; gap: 8px; }
+.grade-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg);
+}
+.grade-subject { font-size: .83rem; font-weight: 500; flex: 1; }
+.grade-label { font-size: .72rem; color: var(--muted); min-width: 80px; }
+.grade-val {
+  font-family: 'DM Mono', monospace;
+  font-size: .9rem; font-weight: 500; min-width: 40px; text-align: right;
+}
+.grade-del {
+  background: none; border: none; cursor: pointer;
+  font-size: .8rem; color: var(--muted); padding: 2px 4px;
+  border-radius: 4px; opacity: 0; transition: opacity .15s, background .15s;
+}
+.grade-row:hover .grade-del { opacity: 1; }
+.grade-del:hover { background: #fdecea; color: #c0392b; }
+
+/* ── Study log ── */
+.log-list { display: flex; flex-direction: column; gap: 6px; }
+.log-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: .8rem;
+}
+.log-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.log-subject { font-weight: 500; flex: 1; }
+.log-duration {
+  font-family: 'DM Mono', monospace;
+  font-size: .75rem; color: var(--muted);
+}
+.log-date { font-size: .7rem; color: var(--muted); }
+
+/* ── Empty state ── */
+.empty {
+  text-align: center; padding: 30px 16px;
+  color: var(--muted); font-size: .82rem;
+}
+.empty-icon { font-size: 2rem; margin-bottom: 8px; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.35);
+  z-index: 200; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border-radius: 16px;
+  padding: 28px; width: min(440px, 92vw);
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  transform: translateY(12px); transition: transform .2s;
+}
+.modal-overlay.open .modal { transform: none; }
+.modal h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem; margin-bottom: 18px;
+}
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block; font-size: .75rem; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+.form-input, .form-select {
+  width: 100%; padding: 9px 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-family: 'DM Sans', sans-serif; font-size: .88rem;
+  background: var(--bg); color: var(--text);
+  outline: none; transition: border-color .15s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;
+}
+
+/* ── Pomodoro config ── */
+.pomo-config {
+  display: flex; gap: 10px; justify-content: center;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.pomo-preset {
+  padding: 5px 12px; border-radius: 99px;
+  border: 1px solid var(--border); background: var(--bg);
+  font-size: .75rem; cursor: pointer; transition: background .15s, border-color .15s;
+}
+.pomo-preset.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Tags ── */
+.tag {
+  display: inline-block;
+  font-size: .62rem; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; padding: 2px 7px;
+  border-radius: 99px;
+}
+.tag-uni  { background: var(--accent-l); color: var(--accent); }
+.tag-self { background: var(--gold-l);   color: var(--gold); }
+.tag-both { background: var(--green-l);  color: var(--green); }
+
+/* ── Pill tabs ── */
+.pill-tabs {
+  display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;
+}
+.pill-tab {
+  padding: 5px 13px; border-radius: 99px;
+  border: 1px solid var(--border); background: none;
+  font-family: 'DM Sans', sans-serif; font-size: .75rem;
+  cursor: pointer; transition: background .15s, border-color .15s, color .15s;
+  color: var(--muted);
+}
+.pill-tab.active {
+  background: var(--text); border-color: var(--text); color: #fff;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+.content > * { animation: fadeUp .35s ease both; }
+.stat-grid   { animation-delay: .05s; }
+.two-col     { animation-delay: .1s; }
+.three-col   { animation-delay: .15s; }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform .3s; }
+  .sidebar.open { transform: none; }
+  .main { margin-left: 0; }
+  .header { padding: 20px 16px 0; }
+  .content { padding: 16px 16px 40px; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .two-col, .three-col { grid-template-columns: 1fr; }
+  .mobile-toggle {
+    position: fixed; top: 16px; left: 16px; z-index: 200;
+    background: var(--text); color: #fff;
+    border: none; border-radius: 8px; padding: 8px 10px;
+    font-size: 1rem; cursor: pointer; display: flex; align-items: center;
+  }
+}
+@media (min-width: 769px) { .mobile-toggle { display: none; } }
+</style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+<div class="layout">
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <h2>Academia</h2>
+    <p>Mi Espacio · Estudio</p>
+  </div>
+
+  <nav>
+    <div class="nav-section">
+      <div class="nav-section-label">Secciones</div>
+      <button class="nav-item active" onclick="showSection('overview')">
+        <span class="nav-icon">📊</span> Resumen
+      </button>
+      <button class="nav-item" onclick="showSection('subjects')">
+        <span class="nav-icon">📚</span> Asignaturas
+      </button>
+      <button class="nav-item" onclick="showSection('assignments')">
+        <span class="nav-icon">📋</span> Tareas
+      </button>
+      <button class="nav-item" onclick="showSection('grades')">
+        <span class="nav-icon">🎓</span> Calificaciones
+      </button>
+      <button class="nav-item" onclick="showSection('timer')">
+        <span class="nav-icon">⏱</span> Temporizador
+      </button>
+    </div>
+  </nav>
+
+  <div class="nav-spacer"></div>
+  <div class="sidebar-back">
+    <a href="index.html">← Mi Espacio</a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <div class="header">
+    <div class="header-left">
+      <h1 id="section-title">Resumen Académico</h1>
+      <p id="section-sub">Un vistazo a tu progreso de hoy</p>
+    </div>
+    <div class="header-actions" id="header-actions">
+      <button class="btn btn-primary" onclick="openModal('subject')">+ Asignatura</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div id="section-overview">
+
+      <!-- Stat row -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Horas hoy</div>
+          <div class="stat-value stat-accent" id="stat-today-hours">0h 0m</div>
+          <div class="stat-sub" id="stat-today-sub">Sin sesiones aún</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Esta semana</div>
+          <div class="stat-value" id="stat-week-hours">0h</div>
+          <div class="stat-sub" id="stat-week-sub">0 sesiones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tareas pendientes</div>
+          <div class="stat-value stat-warm" id="stat-pending">0</div>
+          <div class="stat-sub" id="stat-due-soon">0 próximas a vencer</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Nota media</div>
+          <div class="stat-value stat-gold" id="stat-avg-grade">—</div>
+          <div class="stat-sub">sobre 10</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Upcoming assignments -->
+        <div class="panel">
+          <div class="panel-title">Próximas entregas</div>
+          <div class="assignments-list" id="upcoming-list"></div>
+        </div>
+        <!-- Subject progress -->
+        <div class="panel">
+          <div class="panel-title">Progreso por asignatura</div>
+          <div id="subject-progress-list"></div>
+        </div>
+      </div>
+
+      <!-- Recent study log -->
+      <div class="panel">
+        <div class="panel-title">Sesiones recientes</div>
+        <div class="log-list" id="recent-log"></div>
+      </div>
+
+    </div>
+
+    <!-- ══ SUBJECTS ══ -->
+    <div id="section-subjects" style="display:none">
+      <div class="section-header">
+        <div class="section-title">Mis asignaturas</div>
+        <button class="btn btn-primary" onclick="openModal('subject')">+ Nueva</button>
+      </div>
+      <div class="subjects-list" id="subjects-list-full"></div>
+    </div>
+
+    <!-- ══ ASSIGNMENTS ══ -->
+    <div id="section-assignments" style="display:none">
+      <div class="section-header">
+        <div class="section-title">Tareas y entregas</div>
+        <button class="btn btn-primary" onclick="openModal('assignment')">+ Nueva tarea</button>
+      </div>
+      <div class="pill-tabs" id="assign-tabs">
+        <button class="pill-tab active" onclick="filterAssignments('pending', this)">Pendientes</button>
+        <button class="pill-tab" onclick="filterAssignments('done', this)">Completadas</button>
+        <button class="pill-tab" onclick="filterAssignments('all', this)">Todas</button>
+      </div>
+      <div class="assignments-list" id="assignments-full"></div>
+    </div>
+
+    <!-- ══ GRADES ══ -->
+    <div id="section-grades" style="display:none">
+      <div class="section-header">
+        <div class="section-title">Calificaciones</div>
+        <button class="btn btn-primary" onclick="openModal('grade')">+ Nota</button>
+      </div>
+      <div class="grade-list" id="grade-list-full"></div>
+    </div>
+
+    <!-- ══ TIMER ══ -->
+    <div id="section-timer" style="display:none">
+      <div class="two-col">
+        <!-- Pomodoro -->
+        <div class="panel">
+          <div class="panel-title">Temporizador Pomodoro</div>
+          <div class="pomo-config">
+            <button class="pomo-preset active" onclick="setPomoMode('work',25,this)">25 · Trabajo</button>
+            <button class="pomo-preset" onclick="setPomoMode('short',5,this)">5 · Pausa</button>
+            <button class="pomo-preset" onclick="setPomoMode('long',15,this)">15 · Larga</button>
+          </div>
+          <div class="timer-display">
+            <div class="timer-time" id="pomo-display">25:00</div>
+            <div class="timer-subject-label" id="pomo-subject-label">Selecciona una asignatura</div>
+          </div>
+          <div class="timer-bar-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" id="pomo-progress" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="timer-controls">
+            <button class="btn" onclick="pomoReset()">↺ Reset</button>
+            <button class="btn btn-primary" id="pomo-btn" onclick="pomoToggle()">▶ Iniciar</button>
+          </div>
+          <div class="timer-sessions" id="pomo-dots"></div>
+          <div class="form-group" style="margin-top:16px">
+            <label class="form-label">Asignatura</label>
+            <select class="form-select" id="pomo-subject-select" onchange="updatePomoSubject()">
+              <option value="">— Seleccionar —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Manual log -->
+        <div class="panel">
+          <div class="panel-title">Registrar sesión manual</div>
+          <div class="form-group">
+            <label class="form-label">Asignatura</label>
+            <select class="form-select" id="manual-subject"></select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Horas</label>
+              <input class="form-input" type="number" id="manual-hours" min="0" max="12" value="1" placeholder="h"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Minutos</label>
+              <input class="form-input" type="number" id="manual-mins" min="0" max="59" value="0" placeholder="m"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha</label>
+            <input class="form-input" type="date" id="manual-date"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nota (opcional)</label>
+            <input class="form-input" type="text" id="manual-note" placeholder="¿Qué estudiaste?"/>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="logManual()">Registrar</button>
+
+          <div style="margin-top:20px">
+            <div class="panel-title">Sesiones registradas</div>
+            <div class="log-list" id="all-log"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /layout -->
+
+<!-- ── MODALS ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal-box">
+
+    <!-- Subject modal -->
+    <div id="modal-subject" style="display:none">
+      <h3 id="modal-subject-title">Nueva asignatura</h3>
+      <div class="form-group">
+        <label class="form-label">Nombre</label>
+        <input class="form-input" id="sub-name" placeholder="Ej: Cálculo II"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select class="form-select" id="sub-type">
+            <option value="uni">Universidad</option>
+            <option value="self">Autoestudio</option>
+            <option value="both">Ambos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <select class="form-select" id="sub-color">
+            <option value="#2c5f8a">Azul</option>
+            <option value="#3d6b4f">Verde</option>
+            <option value="#c4622d">Naranja</option>
+            <option value="#9a6f1e">Oro</option>
+            <option value="#6b4a8a">Violeta</option>
+            <option value="#1c1b19">Negro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Créditos / peso (opcional)</label>
+        <input class="form-input" id="sub-credits" type="number" min="0" max="30" placeholder="6"/>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveSubject()">Guardar</button>
+      </div>
+    </div>
+
+    <!-- Assignment modal -->
+    <div id="modal-assignment" style="display:none">
+      <h3>Nueva tarea / entrega</h3>
+      <div class="form-group">
+        <label class="form-label">Título</label>
+        <input class="form-input" id="assign-name" placeholder="Ej: Entrega práctica 3"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Asignatura</label>
+          <select class="form-select" id="assign-subject"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha límite</label>
+          <input class="form-input" type="date" id="assign-due"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="assign-type">
+          <option value="entrega">Entrega</option>
+          <option value="examen">Examen</option>
+          <option value="proyecto">Proyecto</option>
+          <option value="lectura">Lectura</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveAssignment()">Guardar</button>
+      </div>
+    </div>
+
+    <!-- Grade modal -->
+    <div id="modal-grade" style="display:none">
+      <h3>Registrar calificación</h3>
+      <div class="form-group">
+        <label class="form-label">Asignatura</label>
+        <select class="form-select" id="grade-subject"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <input class="form-input" id="grade-desc" placeholder="Ej: Parcial 1, Proyecto final…"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nota (0–10)</label>
+          <input class="form-input" type="number" id="grade-val" min="0" max="10" step="0.1" placeholder="7.5"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Peso % (opcional)</label>
+          <input class="form-input" type="number" id="grade-weight" min="0" max="100" placeholder="30"/>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveGrade()">Guardar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="mi-espacio-sync.js"></script>
+<script>
+/* ══════════════════════════════════
+   STATE & PERSISTENCE (Supabase)
+══════════════════════════════════ */
+function defaultState() {
+  return { subjects: [], assignments: [], grades: [], studyLog: [] };
+}
+
+let S = defaultState();
+let _userId = null;
+let editingSubjectId = null;
+
+/* Local fallback save (used while offline) */
+function saveLocal() {
+  try { localStorage.setItem('academia_v1', JSON.stringify(S)); } catch(e) {}
+}
+
+/* Push a single item to Supabase */
+async function pushItem(table, item) {
+  if (!_userId) return;
+  await window.MiEspacio.Sync.upsert(table, item.id, item, _userId);
+}
+async function deleteItem(table, id) {
+  if (!_userId) return;
+  await window.MiEspacio.Sync.delete(table, id);
+}
+
+/* Combined save: local + cloud */
+async function save(table, item) {
+  saveLocal();
+  if (table && item) await pushItem(table, item);
+}
+
+/* Load all data from Supabase on startup */
+async function loadFromCloud(userId) {
+  _userId = userId;
+  const { Sync } = window.MiEspacio;
+
+  const [subRows, assRows, graRows, logRows] = await Promise.all([
+    Sync.fetchAll('subjects',    userId),
+    Sync.fetchAll('assignments', userId),
+    Sync.fetchAll('grades',      userId),
+    Sync.fetchAll('study_log',   userId),
+  ]);
+
+  S.subjects    = subRows.map(r => r.data);
+  S.assignments = assRows.map(r => r.data);
+  S.grades      = graRows.map(r => r.data);
+  S.studyLog    = logRows.map(r => r.data);
+  saveLocal();
+}
+
+/* Toast */
+function showToast(msg) {
+  let t = document.getElementById('_toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = '_toast';
+    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1c1b19;color:#fff;padding:10px 20px;border-radius:10px;font-family:\'DM Sans\',sans-serif;font-size:.82rem;z-index:9999;pointer-events:none;transition:opacity .3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._to); t._to = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+}
+
+/* ══════════════════════════════════
+   HELPERS
+══════════════════════════════════ */
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function today() { return new Date().toISOString().slice(0,10); }
+function fmt(mins) {
+  const h = Math.floor(mins/60), m = mins%60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+function gradeColor(g) {
+  if (g >= 9) return 'var(--green)';
+  if (g >= 7) return 'var(--accent)';
+  if (g >= 5) return 'var(--gold)';
+  return 'var(--warm)';
+}
+function subjectById(id) { return S.subjects.find(s => s.id === id); }
+function dueDays(dateStr) {
+  const diff = (new Date(dateStr) - new Date(today())) / 86400000;
+  return Math.round(diff);
+}
+function dueCls(dateStr) {
+  const d = dueDays(dateStr);
+  if (d < 0) return 'due-past';
+  if (d <= 3) return 'due-soon';
+  return 'due-ok';
+}
+function dueLabel(dateStr) {
+  const d = dueDays(dateStr);
+  if (d < 0)  return `Vencida hace ${Math.abs(d)} día(s)`;
+  if (d === 0) return 'Vence hoy';
+  if (d === 1) return 'Mañana';
+  return `${d} días`;
+}
+function tagHTML(type) {
+  const map = { uni: ['tag-uni','Univ'], self: ['tag-self','Auto'], both: ['tag-both','Ambos'] };
+  const [cls, label] = map[type] || map['uni'];
+  return `<span class="tag ${cls}">${label}</span>`;
+}
+
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
+const sectionMeta = {
+  overview:    ['Resumen Académico', 'Un vistazo a tu progreso de hoy'],
+  subjects:    ['Mis asignaturas', 'Organiza tus cursos y materias'],
+  assignments: ['Tareas y entregas', 'Gestiona plazos y pendientes'],
+  grades:      ['Calificaciones', 'Registro de notas y evaluaciones'],
+  timer:       ['Temporizador de estudio', 'Sesiones Pomodoro y registro manual'],
+};
+let currentSection = 'overview';
+
+function showSection(name) {
+  currentSection = name;
+  document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
+  document.getElementById('section-' + name).style.display = '';
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.getAttribute('onclick')?.includes(`'${name}'`)) el.classList.add('active');
+  });
+  const [title, sub] = sectionMeta[name];
+  document.getElementById('section-title').textContent = title;
+  document.getElementById('section-sub').textContent = sub;
+  renderSection(name);
+  if (window.innerWidth < 769) closeSidebar();
+}
+
+function renderSection(name) {
+  if (name === 'overview')    renderOverview();
+  if (name === 'subjects')    renderSubjectsFull();
+  if (name === 'assignments') renderAssignmentsFull('pending');
+  if (name === 'grades')      renderGradesFull();
+  if (name === 'timer')       renderTimer();
+}
+
+/* ══════════════════════════════════
+   OVERVIEW
+══════════════════════════════════ */
+function renderOverview() {
+  // Stats
+  const todayStr = today();
+  const todayLog = S.studyLog.filter(l => l.date === todayStr);
+  const todayMins = todayLog.reduce((a,l) => a+l.mins, 0);
+  document.getElementById('stat-today-hours').textContent = fmt(todayMins);
+  document.getElementById('stat-today-sub').textContent =
+    todayLog.length ? `${todayLog.length} sesión(es)` : 'Sin sesiones aún';
+
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+  const weekLog = S.studyLog.filter(l => new Date(l.date) >= weekAgo);
+  const weekMins = weekLog.reduce((a,l) => a+l.mins, 0);
+  document.getElementById('stat-week-hours').textContent = fmt(weekMins);
+  document.getElementById('stat-week-sub').textContent = `${weekLog.length} sesiones`;
+
+  const pending = S.assignments.filter(a => !a.done);
+  const soon = pending.filter(a => {
+    const d = dueDays(a.due); return d >= 0 && d <= 3;
+  });
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-due-soon').textContent = `${soon.length} próxima(s) a vencer`;
+
+  const gradeVals = S.grades.map(g => parseFloat(g.val)).filter(v => !isNaN(v));
+  const avg = gradeVals.length ? (gradeVals.reduce((a,v)=>a+v,0)/gradeVals.length).toFixed(1) : null;
+  const avgEl = document.getElementById('stat-avg-grade');
+  avgEl.textContent = avg ?? '—';
+  avgEl.style.color = avg ? gradeColor(parseFloat(avg)) : '';
+
+  // Upcoming
+  const upcomingEl = document.getElementById('upcoming-list');
+  const upcoming = pending.sort((a,b) => new Date(a.due)-new Date(b.due)).slice(0,5);
+  if (!upcoming.length) {
+    upcomingEl.innerHTML = '<div class="empty"><div class="empty-icon">✅</div>Sin tareas pendientes</div>';
+  } else {
+    upcomingEl.innerHTML = upcoming.map(a => assignItemHTML(a, true)).join('');
+  }
+
+  // Subject progress
+  const progEl = document.getElementById('subject-progress-list');
+  if (!S.subjects.length) {
+    progEl.innerHTML = '<div class="empty"><div class="empty-icon">📚</div>Añade asignaturas para ver progreso</div>';
+  } else {
+    const maxMins = Math.max(...S.subjects.map(sub => {
+      return S.studyLog.filter(l=>l.subjectId===sub.id).reduce((a,l)=>a+l.mins,0);
+    }), 1);
+    progEl.innerHTML = S.subjects.map(sub => {
+      const mins = S.studyLog.filter(l=>l.subjectId===sub.id).reduce((a,l)=>a+l.mins,0);
+      const pct = Math.round((mins/maxMins)*100);
+      return `
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="width:10px;height:10px;border-radius:50%;background:${sub.color};display:inline-block"></span>
+              <span style="font-size:.85rem;font-weight:500">${sub.name}</span>
+              ${tagHTML(sub.type)}
+            </div>
+            <span style="font-family:'DM Mono',monospace;font-size:.75rem;color:var(--muted)">${fmt(mins)}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%;background:${sub.color}"></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Recent log
+  const recentEl = document.getElementById('recent-log');
+  const logs = [...S.studyLog].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
+  recentEl.innerHTML = logs.length
+    ? logs.map(l => logItemHTML(l)).join('')
+    : '<div class="empty"><div class="empty-icon">⏱</div>Sin sesiones registradas</div>';
+}
+
+/* ══════════════════════════════════
+   SUBJECTS
+══════════════════════════════════ */
+function renderSubjectsFull() {
+  const el = document.getElementById('subjects-list-full');
+  if (!S.subjects.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📚</div>Aún no tienes asignaturas. ¡Añade la primera!</div>';
+    return;
+  }
+  el.innerHTML = S.subjects.map(sub => {
+    const mins = S.studyLog.filter(l=>l.subjectId===sub.id).reduce((a,l)=>a+l.mins,0);
+    const grades = S.grades.filter(g=>g.subjectId===sub.id);
+    const avg = grades.length
+      ? (grades.reduce((a,g)=>a+parseFloat(g.val),0)/grades.length).toFixed(1)
+      : null;
+    return `
+      <div class="subject-item">
+        <div class="subject-dot" style="background:${sub.color}"></div>
+        <div class="subject-name">${sub.name}</div>
+        ${tagHTML(sub.type)}
+        ${sub.credits ? `<span style="font-size:.72rem;color:var(--muted)">${sub.credits} cr</span>` : ''}
+        <div style="flex:1"></div>
+        <div style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace;margin-right:8px">${fmt(mins)}</div>
+        <div class="subject-grade" style="color:${avg?gradeColor(parseFloat(avg)):'var(--muted)'}">${avg??'—'}</div>
+        <div class="subject-actions">
+          <button class="icon-btn" onclick="editSubject('${sub.id}')">✏️</button>
+          <button class="icon-btn" onclick="deleteSubject('${sub.id}')">🗑</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openModal(type, extra) {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-subject').style.display = 'none';
+  document.getElementById('modal-assignment').style.display = 'none';
+  document.getElementById('modal-grade').style.display = 'none';
+  document.getElementById('modal-' + type).style.display = '';
+  populateSubjectSelects();
+  if (type === 'assignment') {
+    document.getElementById('assign-due').value = today();
+  }
+  if (type === 'grade') {
+    document.getElementById('grade-val').value = '';
+    document.getElementById('grade-desc').value = '';
+    document.getElementById('grade-weight').value = '';
+  }
+  if (type === 'subject') {
+    editingSubjectId = null;
+    document.getElementById('modal-subject-title').textContent = 'Nueva asignatura';
+    document.getElementById('sub-name').value = '';
+    document.getElementById('sub-credits').value = '';
+  }
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  editingSubjectId = null;
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function populateSubjectSelects() {
+  const opts = S.subjects.length
+    ? S.subjects.map(s => `<option value="${s.id}">${s.name}</option>`).join('')
+    : '<option value="">Sin asignaturas</option>';
+  ['assign-subject','grade-subject','pomo-subject-select','manual-subject'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const prev = el.value;
+      el.innerHTML = (id === 'pomo-subject-select' ? '<option value="">— Seleccionar —</option>' : '') + opts;
+      if (prev) el.value = prev;
+    }
+  });
+}
+
+function saveSubject() {
+  const name = document.getElementById('sub-name').value.trim();
+  if (!name) return;
+  if (editingSubjectId) {
+    const sub = subjectById(editingSubjectId);
+    if (sub) {
+      sub.name    = name;
+      sub.type    = document.getElementById('sub-type').value;
+      sub.color   = document.getElementById('sub-color').value;
+      sub.credits = document.getElementById('sub-credits').value;
+      save('subjects', sub);
+    }
+  } else {
+    const sub = {
+      id: uid(), name,
+      type:    document.getElementById('sub-type').value,
+      color:   document.getElementById('sub-color').value,
+      credits: document.getElementById('sub-credits').value,
+    };
+    S.subjects.push(sub);
+    save('subjects', sub);
+  }
+  closeModal(); renderSection(currentSection);
+}
+
+function editSubject(id) {
+  const sub = subjectById(id);
+  if (!sub) return;
+  editingSubjectId = id;
+  openModal('subject');
+  document.getElementById('modal-subject-title').textContent = 'Editar asignatura';
+  document.getElementById('sub-name').value    = sub.name;
+  document.getElementById('sub-type').value    = sub.type;
+  document.getElementById('sub-color').value   = sub.color;
+  document.getElementById('sub-credits').value = sub.credits || '';
+}
+
+function deleteSubject(id) {
+  if (!confirm('¿Eliminar esta asignatura? También se borrarán sus notas y sesiones.')) return;
+  const relatedAssignments = S.assignments.filter(a => a.subjectId === id).map(a => a.id);
+  const relatedGrades      = S.grades.filter(g => g.subjectId === id).map(g => g.id);
+  const relatedLogs        = S.studyLog.filter(l => l.subjectId === id).map(l => l.id);
+  S.subjects    = S.subjects.filter(s => s.id !== id);
+  S.grades      = S.grades.filter(g => g.subjectId !== id);
+  S.studyLog    = S.studyLog.filter(l => l.subjectId !== id);
+  S.assignments = S.assignments.filter(a => a.subjectId !== id);
+  saveLocal();
+  if (_userId) {
+    deleteItem('subjects', id);
+    relatedAssignments.forEach(i => deleteItem('assignments', i));
+    relatedGrades.forEach(i => deleteItem('grades', i));
+    relatedLogs.forEach(i => deleteItem('study_log', i));
+  }
+  renderSection(currentSection);
+}
+
+/* ══════════════════════════════════
+   ASSIGNMENTS
+══════════════════════════════════ */
+function assignItemHTML(a, compact) {
+  const sub = subjectById(a.subjectId);
+  const cls = dueCls(a.due);
+  const label = dueLabel(a.due);
+  return `
+    <div class="assign-item ${a.done ? 'done-item' : ''}" id="ai-${a.id}">
+      <div class="assign-check" onclick="toggleAssignment('${a.id}')">${a.done ? '✓' : ''}</div>
+      <div class="assign-info">
+        <div class="assign-title">${a.title}</div>
+        <div class="assign-meta">
+          ${sub ? `<span class="assign-subject" style="color:${sub.color}">${sub.name}</span>` : ''}
+          <span class="assign-subject">${a.atype || 'Entrega'}</span>
+          <span class="assign-due ${cls}">${label}</span>
+        </div>
+      </div>
+      ${!compact ? `<button class="assign-del" onclick="deleteAssignment('${a.id}')">✕</button>` : ''}
+    </div>`;
+}
+
+let assignFilter = 'pending';
+function renderAssignmentsFull(filter) {
+  if (filter) assignFilter = filter;
+  const el = document.getElementById('assignments-full');
+  let list = S.assignments;
+  if (assignFilter === 'pending') list = list.filter(a => !a.done);
+  if (assignFilter === 'done')    list = list.filter(a => a.done);
+  list = list.sort((a,b) => new Date(a.due)-new Date(b.due));
+  el.innerHTML = list.length
+    ? list.map(a => assignItemHTML(a, false)).join('')
+    : '<div class="empty"><div class="empty-icon">📋</div>No hay tareas en esta categoría</div>';
+}
+
+function filterAssignments(filter, btn) {
+  document.querySelectorAll('#assign-tabs .pill-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAssignmentsFull(filter);
+}
+
+function saveAssignment() {
+  const title = document.getElementById('assign-name').value.trim();
+  if (!title) return;
+  const a = {
+    id: uid(), title,
+    subjectId: document.getElementById('assign-subject').value,
+    due:   document.getElementById('assign-due').value,
+    atype: document.getElementById('assign-type').value,
+    done: false,
+  };
+  S.assignments.push(a);
+  save('assignments', a);
+  closeModal(); renderSection(currentSection);
+}
+
+function toggleAssignment(id) {
+  const a = S.assignments.find(x => x.id === id);
+  if (a) { a.done = !a.done; save(); renderSection(currentSection); }
+}
+
+function deleteAssignment(id) {
+  S.assignments = S.assignments.filter(a => a.id !== id);
+  save(); renderAssignmentsFull();
+}
+
+/* ══════════════════════════════════
+   GRADES
+══════════════════════════════════ */
+function renderGradesFull() {
+  const el = document.getElementById('grade-list-full');
+  if (!S.grades.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🎓</div>Sin calificaciones registradas</div>';
+    return;
+  }
+  const sorted = [...S.grades].sort((a,b) => (a.subjectId > b.subjectId ? 1 : -1));
+  el.innerHTML = sorted.map(g => {
+    const sub = subjectById(g.subjectId);
+    const val = parseFloat(g.val);
+    return `
+      <div class="grade-row">
+        <div style="width:10px;height:10px;border-radius:50%;background:${sub?.color||'var(--border)'};flex-shrink:0"></div>
+        <div class="grade-subject">${sub?.name || '—'}</div>
+        <div class="grade-label">${g.desc}</div>
+        ${g.weight ? `<span style="font-size:.7rem;color:var(--muted)">${g.weight}%</span>` : ''}
+        <div class="grade-val" style="color:${gradeColor(val)}">${val.toFixed(1)}</div>
+        <button class="grade-del" onclick="deleteGrade('${g.id}')">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function saveGrade() {
+  const val = parseFloat(document.getElementById('grade-val').value);
+  const desc = document.getElementById('grade-desc').value.trim();
+  if (isNaN(val) || !desc) return;
+  S.grades.push({
+    id: uid(),
+    subjectId: document.getElementById('grade-subject').value,
+    desc, val,
+    weight: document.getElementById('grade-weight').value,
+    date: today(),
+  });
+  save(); closeModal(); renderSection(currentSection);
+}
+
+function deleteGrade(id) {
+  S.grades = S.grades.filter(g => g.id !== id);
+  save(); renderGradesFull();
+}
+
+/* ══════════════════════════════════
+   STUDY LOG
+══════════════════════════════════ */
+function logItemHTML(l) {
+  const sub = subjectById(l.subjectId);
+  return `
+    <div class="log-item">
+      <div class="log-dot" style="background:${sub?.color||'var(--muted)'}"></div>
+      <div class="log-subject">${sub?.name || 'Sin asignatura'}</div>
+      ${l.note ? `<div style="font-size:.72rem;color:var(--muted);flex:1">${l.note}</div>` : '<div style="flex:1"></div>'}
+      <div class="log-duration">${fmt(l.mins)}</div>
+      <div class="log-date">${l.date}</div>
+    </div>`;
+}
+
+function renderTimer() {
+  populateSubjectSelects();
+  document.getElementById('manual-date').value = today();
+  renderAllLog();
+  renderPomoSessions();
+}
+
+function renderAllLog() {
+  const el = document.getElementById('all-log');
+  const logs = [...S.studyLog].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,20);
+  el.innerHTML = logs.length
+    ? logs.map(l => logItemHTML(l)).join('')
+    : '<div class="empty"><div class="empty-icon">⏱</div>Sin sesiones aún</div>';
+}
+
+function logManual() {
+  const h = parseInt(document.getElementById('manual-hours').value)||0;
+  const m = parseInt(document.getElementById('manual-mins').value)||0;
+  const mins = h*60+m;
+  if (!mins) return;
+  S.studyLog.push({
+    id: uid(),
+    subjectId: document.getElementById('manual-subject').value,
+    mins, date: document.getElementById('manual-date').value,
+    note: document.getElementById('manual-note').value.trim(),
+    source: 'manual',
+  });
+  save();
+  document.getElementById('manual-hours').value = '1';
+  document.getElementById('manual-mins').value  = '0';
+  document.getElementById('manual-note').value  = '';
+  renderAllLog();
+}
+
+/* ══════════════════════════════════
+   POMODORO
+══════════════════════════════════ */
+let pomoState = { running: false, mode: 'work', totalSecs: 25*60, remainSecs: 25*60, interval: null, sessions: 0 };
+
+function setPomoMode(mode, mins, btn) {
+  document.querySelectorAll('.pomo-preset').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  pomoReset();
+  pomoState.mode = mode;
+  pomoState.totalSecs = mins*60;
+  pomoState.remainSecs = mins*60;
+  updatePomoDisplay();
+}
+
+function updatePomoDisplay() {
+  const m = Math.floor(pomoState.remainSecs/60);
+  const s = pomoState.remainSecs % 60;
+  document.getElementById('pomo-display').textContent =
+    `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const pct = ((pomoState.totalSecs - pomoState.remainSecs) / pomoState.totalSecs) * 100;
+  document.getElementById('pomo-progress').style.width = pct + '%';
+}
+
+function updatePomoSubject() {
+  const sel = document.getElementById('pomo-subject-select');
+  const sub = subjectById(sel.value);
+  document.getElementById('pomo-subject-label').textContent = sub ? sub.name : 'Selecciona una asignatura';
+}
+
+function pomoToggle() {
+  const btn = document.getElementById('pomo-btn');
+  if (pomoState.running) {
+    clearInterval(pomoState.interval);
+    pomoState.running = false;
+    btn.textContent = '▶ Reanudar';
+  } else {
+    pomoState.running = true;
+    btn.textContent = '⏸ Pausar';
+    pomoState.interval = setInterval(() => {
+      pomoState.remainSecs--;
+      updatePomoDisplay();
+      if (pomoState.remainSecs <= 0) {
+        clearInterval(pomoState.interval);
+        pomoState.running = false;
+        pomoState.sessions++;
+        if (pomoState.mode === 'work') {
+          // log the session
+          const subjectId = document.getElementById('pomo-subject-select').value;
+          S.studyLog.push({
+            id: uid(), subjectId,
+            mins: Math.round(pomoState.totalSecs/60),
+            date: today(), source: 'pomodoro', note: 'Pomodoro',
+          });
+          save();
+        }
+        renderPomoSessions();
+        btn.textContent = '▶ Iniciar';
+        new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=').play().catch(()=>{});
+        alert(pomoState.mode === 'work' ? '¡Sesión completada! Tómate un descanso.' : '¡Pausa terminada! A estudiar.');
+        pomoReset();
+      }
+    }, 1000);
+  }
+}
+
+function pomoReset() {
+  clearInterval(pomoState.interval);
+  pomoState.running = false;
+  pomoState.remainSecs = pomoState.totalSecs;
+  document.getElementById('pomo-btn').textContent = '▶ Iniciar';
+  updatePomoDisplay();
+}
+
+function renderPomoSessions() {
+  const el = document.getElementById('pomo-dots');
+  if (!el) return;
+  const n = Math.min(pomoState.sessions, 8);
+  el.innerHTML = Array.from({length:4}, (_,i) =>
+    `<div class="session-dot ${i < n ? 'done' : i === n && pomoState.running ? 'current' : ''}"></div>`
+  ).join('');
+}
+
+/* ══════════════════════════════════
+   MOBILE SIDEBAR
+══════════════════════════════════ */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+// Render con datos locales inmediatamente
+const _localAcad = localStorage.getItem('academia_v1');
+if(_localAcad){ try{ S = {...defaultState(), ...JSON.parse(_localAcad)}; }catch(_){} }
+renderOverview();
+updatePomoDisplay();
+populateSubjectSelects();
+
+/* ── Supabase Auth ── */
+async function onUserReady(user){
+  const profile = await window.MiEspacio.Profile.get(user.id);
+  const name    = profile?.name || user.email.split('@')[0];
+  const color   = profile?.avatar_color || '#2c5f8a';
+  const av = document.getElementById('_sidebar-avatar');
+  if(av){ av.style.background=color; av.textContent=name.slice(0,2).toUpperCase(); av.style.display='flex'; }
+  await loadFromCloud(user.id);
+  renderSection(currentSection);
+  populateSubjectSelects();
+}
+window.MiEspacio.initAuth(onUserReady);
+</script>
+</body>
+</html>

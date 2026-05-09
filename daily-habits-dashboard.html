@@ -691,6 +691,7 @@ body {
 
 <div id="toast"></div>
 
+<script src="mi-espacio-sync.js"></script>
 <script>
 /* ════════════════════════════════
    ESTADO
@@ -726,17 +727,43 @@ function defaultState(){
   };
 }
 
-function load(){
-  try { S = JSON.parse(localStorage.getItem(KEY)) || defaultState(); }
-  catch(e){ S = defaultState(); }
-  // ensure keys
+let _userId = null;
+
+function ensureKeys(){
   if(!S.routines) S.routines = { manana:[], tarde:[], noche:[] };
   if(!S.todayChecks) S.todayChecks = {};
   if(!S.moodLog) S.moodLog = {};
   if(!S.diario) S.diario = {};
   if(!S.streaks) S.streaks = {};
 }
-function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+
+function load(){
+  try { S = JSON.parse(localStorage.getItem(KEY)) || defaultState(); }
+  catch(e){ S = defaultState(); }
+  ensureKeys();
+}
+
+/* Guarda en localStorage y sube a Supabase (tabla habits, fila única por usuario) */
+async function save(){
+  localStorage.setItem(KEY, JSON.stringify(S));
+  if(!_userId) return;
+  try {
+    /* Usamos el user_id como id de fila para mantener una sola fila por usuario */
+    await window.MiEspacio.Sync.upsert('habits', _userId, S, _userId);
+  } catch(e){ console.warn('Sync habits error:', e); }
+}
+
+async function loadFromCloud(userId){
+  _userId = userId;
+  try {
+    const rows = await window.MiEspacio.Sync.fetchAll('habits', userId);
+    if(rows.length){
+      S = { ...defaultState(), ...rows[0].data };
+      ensureKeys();
+      localStorage.setItem(KEY, JSON.stringify(S));
+    }
+  } catch(e){ console.warn('loadFromCloud habits error:', e); }
+}
 
 /* ════════════════════════════════
    HELPERS DATE
@@ -1350,6 +1377,21 @@ if(!S.habits.length){
 
 updateStreaks();
 render();
+
+/* ── Supabase Auth ── */
+async function onUserReady(user){
+  _userId = user.id;
+  // Actualizar avatar en sidebar si existe
+  const profile = await window.MiEspacio.Profile.get(user.id);
+  const name    = profile?.name || user.email.split('@')[0];
+  const color   = profile?.avatar_color || '#3d6b4f';
+  const av = document.getElementById('_sidebar-avatar');
+  if(av){ av.style.background = color; av.textContent = name.slice(0,2).toUpperCase(); av.style.display='flex'; }
+  // Cargar datos cloud (sobreescribe localStorage si hay datos)
+  await loadFromCloud(user.id);
+  updateStreaks(); render();
+}
+window.MiEspacio.initAuth(onUserReady);
 
 // ── Service Worker registration ──
 if('serviceWorker' in navigator){

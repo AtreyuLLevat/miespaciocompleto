@@ -728,6 +728,7 @@ canvas.linechart { width:100%; height:140px; display:block; }
 
 <div id="toast"></div>
 
+<script src="mi-espacio-sync.js"></script>
 <script>
 /* ════════════════════════════════
    STATE
@@ -741,13 +742,30 @@ let S = {
   log: []           // {type, text, date}
 };
 
+let _userId = null;
 function genId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+async function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+  if(!_userId) return;
+  try {
+    await window.MiEspacio.Sync.upsertStartup(S, _userId);
+  } catch(e){ console.warn('Sync startup error:', e); }
+}
+
 function load(){
   try{
     const d = localStorage.getItem(KEY);
     if(d){ const p=JSON.parse(d); S={...S,...p}; }
   }catch(e){}
+}
+
+async function loadFromCloud(userId){
+  _userId = userId;
+  try {
+    const row = await window.MiEspacio.Sync.fetchStartup(userId);
+    if(row?.data){ S = { ...S, ...row.data }; localStorage.setItem(KEY, JSON.stringify(S)); }
+  } catch(e){ console.warn('loadFromCloud startup error:', e); }
 }
 
 /* ════════════════════════════════
@@ -1171,25 +1189,42 @@ window.addEventListener('resize',()=>drawRevChart());
 ════════════════════════════════ */
 load();
 
-if(!S.tasks.length){
-  const seeds=[
-    {type:'dev',text:'Set up project repo and CI/CD pipeline',priority:'high'},
-    {type:'dev',text:'Build user authentication flow',priority:'high'},
-    {type:'dev',text:'Design onboarding UX',priority:'mid'},
-    {type:'dev',text:'Implement core feature MVP',priority:'high'},
-    {type:'bug',text:'Fix mobile layout on iOS Safari',priority:'mid'},
-    {type:'biz',text:'Define pricing strategy',priority:'high'},
-    {type:'biz',text:'Research 5 direct competitors',priority:'mid'},
-    {type:'biz',text:'Set up Stripe payments',priority:'high'},
-    {type:'mkt',text:'Launch landing page',priority:'high'},
-    {type:'mkt',text:'Post on LinkedIn & Twitter daily for 30 days',priority:'mid'},
-    {type:'mkt',text:'Record first product demo video',priority:'mid'},
-  ];
-  seeds.forEach(s=>S.tasks.push({id:genId(),...s,done:false,createdAt:Date.now()}));
-  save();
+function seedIfEmpty(){
+  if(!S.tasks.length){
+    const seeds=[
+      {type:'dev',text:'Set up project repo and CI/CD pipeline',priority:'high'},
+      {type:'dev',text:'Build user authentication flow',priority:'high'},
+      {type:'dev',text:'Design onboarding UX',priority:'mid'},
+      {type:'dev',text:'Implement core feature MVP',priority:'high'},
+      {type:'bug',text:'Fix mobile layout on iOS Safari',priority:'mid'},
+      {type:'biz',text:'Define pricing strategy',priority:'high'},
+      {type:'biz',text:'Research 5 direct competitors',priority:'mid'},
+      {type:'biz',text:'Set up Stripe payments',priority:'high'},
+      {type:'mkt',text:'Launch landing page',priority:'high'},
+      {type:'mkt',text:'Post on LinkedIn & Twitter daily for 30 days',priority:'mid'},
+      {type:'mkt',text:'Record first product demo video',priority:'mid'},
+    ];
+    seeds.forEach(s=>S.tasks.push({id:genId(),...s,done:false,createdAt:Date.now()}));
+    save();
+  }
 }
 
+seedIfEmpty();
 render();
+
+/* ── Supabase Auth ── */
+async function onUserReady(user){
+  _userId = user.id;
+  const profile = await window.MiEspacio.Profile.get(user.id);
+  const name    = profile?.name || user.email.split('@')[0];
+  const color   = profile?.avatar_color || '#1c1b19';
+  const av = document.getElementById('_sidebar-avatar');
+  if(av){ av.style.background=color; av.textContent=name.slice(0,2).toUpperCase(); av.style.display='flex'; }
+  await loadFromCloud(user.id);
+  seedIfEmpty();
+  render();
+}
+window.MiEspacio.initAuth(onUserReady);
 </script>
 </body>
 </html>
