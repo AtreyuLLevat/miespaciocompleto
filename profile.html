@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mi Perfil — Mi Espacio</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#1c1b19"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f8f7f4;
+  --surface:  #ffffff;
+  --s2:       #f1f0ec;
+  --border:   #e5e3db;
+  --text:     #1c1b19;
+  --muted:    #8c8a83;
+  --green:    #3d6b4f;
+  --green-l:  #eaf2ed;
+  --blue:     #2c5f8a;
+  --blue-l:   #eaf2f9;
+  --warm:     #c4622d;
+  --warm-l:   #fdf0e8;
+  --gold:     #9a6f1e;
+  --gold-l:   #fdf5e0;
+  --radius:   14px;
+  --sh:       0 1px 3px rgba(0,0,0,.05), 0 4px 14px rgba(0,0,0,.07);
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Layout ── */
+.app { display: flex; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 260px; flex-shrink: 0;
+  background: var(--text); color: #fff;
+  display: flex; flex-direction: column;
+  padding: 32px 0;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 50; overflow-y: auto;
+}
+.sidebar-brand {
+  padding: 0 26px 28px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  margin-bottom: 28px;
+}
+.sidebar-brand h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; letter-spacing: -.02em; color: #fff; margin-bottom: 3px;
+}
+.sidebar-brand p { font-size: .72rem; color: rgba(255,255,255,.35); letter-spacing: .08em; text-transform: uppercase; }
+.nav-group { margin-bottom: 24px; }
+.nav-group-label {
+  font-size: .6rem; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(255,255,255,.25); padding: 0 26px 8px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 26px; font-size: .85rem; font-weight: 500;
+  color: rgba(255,255,255,.5); text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: background .15s, color .15s;
+}
+.nav-link:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+.nav-link.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: #fff; }
+.nav-icon { font-size: .95rem; width: 18px; text-align: center; }
+
+/* Back to space — destacado en sidebar */
+.back-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 26px; font-size: .82rem; font-weight: 600;
+  color: rgba(255,255,255,.4); text-decoration: none;
+  transition: color .15s;
+  margin-bottom: 4px;
+}
+.back-link:hover { color: rgba(255,255,255,.8); }
+
+/* ── Main ── */
+.main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* ── Topbar ── */
+.topbar {
+  padding: 18px 36px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg); position: sticky; top: 0; z-index: 40;
+}
+.topbar-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; letter-spacing: -.01em;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 9px;
+  font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text);
+  text-decoration: none; transition: background .15s;
+}
+.btn:hover { background: var(--s2); }
+.btn-danger { border-color: #f4c4a0; color: var(--warm); background: var(--warm-l); }
+.btn-danger:hover { background: #fde4d0; }
+.btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+.btn-primary:hover { opacity: .88; background: var(--text); }
+
+/* ── Content ── */
+.content { padding: 36px; flex: 1; max-width: 800px; }
+
+/* ── Profile hero ── */
+.profile-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 36px;
+  display: flex; align-items: center; gap: 28px;
+  box-shadow: var(--sh);
+  margin-bottom: 24px;
+}
+.profile-avatar-big {
+  width: 80px; height: 80px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; font-weight: 700; color: #fff;
+  flex-shrink: 0; letter-spacing: .02em;
+  border: 3px solid rgba(0,0,0,.08);
+}
+.profile-info { flex: 1; min-width: 0; }
+.profile-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; letter-spacing: -.02em; margin-bottom: 4px;
+}
+.profile-email { font-size: .83rem; color: var(--muted); margin-bottom: 10px; }
+.profile-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.profile-badge {
+  font-size: .62rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 6px;
+}
+.badge-green  { background: var(--green-l);  color: var(--green); }
+.badge-blue   { background: var(--blue-l);   color: var(--blue); }
+.badge-warm   { background: var(--warm-l);   color: var(--warm); }
+.badge-gold   { background: var(--gold-l);   color: var(--gold); }
+.profile-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Stats grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 18px 14px;
+  box-shadow: var(--sh);
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--stat-accent, var(--border));
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.stat-label {
+  font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+}
+.stat-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.6rem; font-weight: 500; color: var(--text); line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-sub { font-size: .72rem; color: var(--muted); }
+
+/* ── Two col ── */
+.two-col {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; margin-bottom: 16px;
+}
+
+/* ── Panel ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--sh);
+  overflow: hidden;
+}
+.panel-header {
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  font-size: .72rem; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted);
+}
+.panel-body { padding: 18px 20px; }
+
+/* ── Form elements ── */
+.form-group { margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label {
+  display: block; font-size: .7rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 7px;
+}
+.form-input {
+  width: 100%; padding: 10px 13px;
+  background: var(--s2); border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: .88rem; color: var(--text);
+  outline: none; transition: border-color .15s, background .15s;
+}
+.form-input:focus { border-color: var(--text); background: #fff; }
+
+/* Color picker */
+.color-grid {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.color-swatch {
+  width: 32px; height: 32px; border-radius: 50%;
+  cursor: pointer; border: 2.5px solid transparent;
+  transition: transform .15s, border-color .15s;
+}
+.color-swatch:hover { transform: scale(1.12); }
+.color-swatch.selected { border-color: var(--text); }
+
+/* ── Progress bars ── */
+.prog-row { margin-bottom: 14px; }
+.prog-row:last-child { margin-bottom: 0; }
+.prog-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 5px;
+}
+.prog-name { font-size: .82rem; font-weight: 500; }
+.prog-val { font-family: 'DM Mono', monospace; font-size: .72rem; color: var(--muted); }
+.prog-track {
+  height: 6px; background: var(--s2);
+  border-radius: 99px; overflow: hidden; border: 1px solid var(--border);
+}
+.prog-fill {
+  height: 100%; border-radius: 99px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Space links ── */
+.space-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  text-decoration: none; color: var(--text);
+  transition: opacity .15s;
+}
+.space-link:last-child { border-bottom: none; }
+.space-link:hover { opacity: .75; }
+.space-link-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
+.space-link-info { flex: 1; }
+.space-link-name { font-size: .85rem; font-weight: 600; }
+.space-link-sub  { font-size: .72rem; color: var(--muted); }
+.space-link-arrow { font-size: .85rem; color: var(--muted); }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text); color: #fff;
+  font-size: .82rem; font-weight: 500;
+  padding: 10px 18px; border-radius: 9px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity .25s, transform .25s;
+  pointer-events: none; z-index: 999;
+}
+#toast.show { opacity: 1; transform: none; }
+
+/* ── Coming soon ── */
+.coming-soon-panel {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center; color: var(--muted);
+  font-size: .8rem; background: transparent;
+}
+.coming-soon-panel .cs-icon { font-size: 1.6rem; margin-bottom: 8px; }
+.coming-soon-panel .cs-title { font-weight: 600; color: var(--text); margin-bottom: 4px; font-size: .88rem; }
+
+/* ── Animations ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+.anim-1 { animation: fadeUp .3s ease both .05s; }
+.anim-2 { animation: fadeUp .3s ease both .12s; }
+.anim-3 { animation: fadeUp .3s ease both .2s; }
+.anim-4 { animation: fadeUp .3s ease both .28s; }
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .content { padding: 20px 18px 60px; }
+  .profile-hero { flex-direction: column; text-align: center; align-items: center; padding: 24px; }
+  .profile-badges { justify-content: center; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <h1>Mi Espacio</h1>
+      <p>Dashboard personal</p>
+    </div>
+    <div class="nav-group" style="padding-top:0">
+      <a class="back-link" href="index.html">← Volver a Mi Espacio</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Navegación</div>
+      <a class="nav-link" href="index.html"><span class="nav-icon">◈</span> Resumen</a>
+      <a class="nav-link active" href="profile.html"><span class="nav-icon">◉</span> Mi Perfil</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Espacios</div>
+      <a class="nav-link" href="daily-habits-dashboard.html"><span class="nav-icon">🌱</span> Vida Diaria</a>
+      <a class="nav-link" href="startup-dashboard.html"><span class="nav-icon">🚀</span> Startup OS</a>
+      <a class="nav-link" href="academic-dashboard.html"><span class="nav-icon">🎓</span> Academia</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title">Mi Perfil</div>
+      <div style="display:flex;gap:8px">
+        <a class="btn" href="index.html">← Mi Espacio</a>
+        <button class="btn btn-danger" onclick="MiAuth.signOut()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ── PROFILE HERO ── -->
+      <div class="profile-hero anim-1">
+        <div class="profile-avatar-big" id="profile-avatar" style="background:#2c5f8a">?</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profile-name">Cargando…</div>
+          <div class="profile-email" id="profile-email"></div>
+          <div class="profile-badges" id="profile-badges"></div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-primary" onclick="saveProfile()">Guardar cambios</button>
+          <button class="btn btn-danger" onclick="MiAuth.signOut()">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <!-- ── STATS ── -->
+      <div class="stats-grid anim-2">
+        <div class="stat-card" style="--stat-accent:#3d6b4f">
+          <div class="stat-label">Hábitos activos</div>
+          <div class="stat-value" id="stat-habits">—</div>
+          <div class="stat-sub">configurados</div>
+        </div>
+        <div class="stat-card" style="--stat-accent:#c4622d">
+          <div class="stat-label">Racha máxima</div>
+          <div class="stat-value" id="stat-streak">—</div>
+          <div class="stat-sub">días seguidos 🔥</div>
+        </div>
+        <div class="stat-card" style="--stat-accent:#2c5f8a">
+          <div class="stat-label">Tareas abiertas</div>
+          <div class="stat-value" id="stat-tasks">—</div>
+          <div class="stat-sub">en Startup OS</div>
+        </div>
+        <div class="stat-card" style="--stat-accent:#9a6f1e">
+          <div class="stat-label">Horas de estudio</div>
+          <div class="stat-value" id="stat-hours">—</div>
+          <div class="stat-sub">esta semana</div>
+        </div>
+      </div>
+
+      <!-- ── EDIT + SPACES ── -->
+      <div class="two-col anim-3">
+
+        <!-- Editar perfil -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Editar perfil</div></div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="form-label">Nombre</label>
+              <input class="form-input" id="edit-name" type="text" placeholder="Tu nombre"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color de avatar</label>
+              <div class="color-grid" id="color-grid"></div>
+            </div>
+            <div style="padding-top:8px">
+              <button class="btn btn-primary" style="width:100%" onclick="saveProfile()">Guardar cambios</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mis espacios (acceso rápido) -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Mis espacios</div></div>
+          <div class="panel-body">
+            <a class="space-link" href="daily-habits-dashboard.html">
+              <div class="space-link-icon" style="background:#eaf2ed">🌱</div>
+              <div class="space-link-info">
+                <div class="space-link-name">Vida Diaria</div>
+                <div class="space-link-sub">Hábitos, rutinas y ánimo</div>
+              </div>
+              <div class="space-link-arrow">→</div>
+            </a>
+            <a class="space-link" href="startup-dashboard.html">
+              <div class="space-link-icon" style="background:#f1f0ec">🚀</div>
+              <div class="space-link-info">
+                <div class="space-link-name">Startup OS</div>
+                <div class="space-link-sub">KPIs, tareas y revenue</div>
+              </div>
+              <div class="space-link-arrow">→</div>
+            </a>
+            <a class="space-link" href="academic-dashboard.html">
+              <div class="space-link-icon" style="background:#eaf2f9">🎓</div>
+              <div class="space-link-info">
+                <div class="space-link-name">Academia</div>
+                <div class="space-link-sub">Notas, tareas y estudio</div>
+              </div>
+              <div class="space-link-arrow">→</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROGRESS OVERVIEW ── -->
+      <div class="two-col anim-4">
+        <!-- Hábitos — progreso 7 días -->
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Progreso de hábitos (7 días)</div></div>
+          <div class="panel-body" id="progress-habits">
+            <div style="color:var(--muted);font-size:.82rem">Cargando…</div>
+          </div>
+        </div>
+
+        <!-- Coming soon: estadísticas globales -->
+        <div class="coming-soon-panel" style="display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div class="cs-icon">📊</div>
+          <div class="cs-title">Estadísticas globales</div>
+          <div>Próximamente disponible</div>
+        </div>
+      </div>
+
+      <!-- ── ZONA DE PELIGRO ── -->
+      <div class="panel" style="margin-top:16px;border-color:#f4c4a0">
+        <div class="panel-header" style="border-bottom-color:#f4c4a0">
+          <div class="panel-title" style="color:var(--warm)">Cuenta</div>
+        </div>
+        <div class="panel-body" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-danger" onclick="MiAuth.signOut()">Cerrar sesión</button>
+          <div style="font-size:.75rem;color:var(--muted);display:flex;align-items:center">
+            Al cerrar sesión, tus datos locales se conservan.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<!-- auth.js PRIMERO — gestiona la sesión -->
+<script src="auth.js"></script>
+
+<script>
+/* ─────────────────────
+   COLOR SWATCHES
+───────────────────── */
+const COLORS = [
+  '#2c5f8a','#3d6b4f','#c4622d','#9a6f1e',
+  '#6b4a8a','#1c1b19','#b5424e','#2a7a7a',
+];
+let selectedColor = COLORS[0];
+let currentUserId = null;
+
+function buildColorGrid(current) {
+  const grid = document.getElementById('color-grid');
+  grid.innerHTML = '';
+  COLORS.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (c === current ? ' selected' : '');
+    sw.style.background = c;
+    sw.dataset.color = c;
+    sw.onclick = () => pickColor(c);
+    grid.appendChild(sw);
+  });
+  selectedColor = current || COLORS[0];
+}
+
+function pickColor(c) {
+  selectedColor = c;
+  document.querySelectorAll('.color-swatch').forEach(sw => {
+    sw.classList.toggle('selected', sw.dataset.color === c);
+  });
+  // Preview instantáneo en avatar
+  const av = document.getElementById('profile-avatar');
+  if (av) av.style.background = c;
+}
+
+/* ─────────────────────
+   STATS
+───────────────────── */
+function loadStats() {
+  // Hábitos
+  try {
+    const habData = JSON.parse(localStorage.getItem('vidaDiaria_v2') || '{}');
+    const habits = habData.habits || [];
+    document.getElementById('stat-habits').textContent = habits.length;
+
+    const streaks = habData.streaks || {};
+    const maxStreak = habits.length ? Math.max(...habits.map(h => streaks[h.id] || 0)) : 0;
+    document.getElementById('stat-streak').textContent = maxStreak;
+
+    // Progreso 7 días
+    renderHabitProgress(habData);
+  } catch (_) {}
+
+  // Startup tasks
+  try {
+    const sd = JSON.parse(localStorage.getItem('founderOS_v1') || '{}');
+    const open = (sd.tasks || []).filter(t => !t.done).length;
+    document.getElementById('stat-tasks').textContent = open;
+  } catch (_) {}
+
+  // Horas de estudio esta semana
+  try {
+    const acad = JSON.parse(localStorage.getItem('academia_v1') || '{}');
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+    const mins = (acad.studyLog || [])
+      .filter(l => new Date(l.date) >= weekAgo)
+      .reduce((a, l) => a + l.mins, 0);
+    const hrs = Math.floor(mins / 60);
+    const m   = mins % 60;
+    document.getElementById('stat-hours').textContent = hrs > 0 ? `${hrs}h ${m}m` : `${m}m`;
+  } catch (_) {}
+}
+
+function renderHabitProgress(habData) {
+  const el = document.getElementById('progress-habits');
+  const habits = habData.habits || [];
+  if (!habits.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.82rem">Sin hábitos configurados.</div>';
+    return;
+  }
+  const catColors = {
+    salud: '#3d6b4f', mente: '#6b4a8a', social: '#2c5f8a',
+    hogar: '#c4622d', otro: '#9a6f1e',
+  };
+  el.innerHTML = '';
+  habits.forEach(h => {
+    let done = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const ds = d.toISOString().slice(0, 10);
+      if ((habData.todayChecks || {})[ds]?.[h.id]) done++;
+    }
+    const pct = Math.round(done / 7 * 100);
+    const color = catColors[h.cat] || '#2c5f8a';
+    const div = document.createElement('div');
+    div.className = 'prog-row';
+    div.innerHTML = `
+      <div class="prog-head">
+        <span class="prog-name">${h.emoji || '✦'} ${escHtml(h.name)}</span>
+        <span class="prog-val">${done}/7 · ${pct}%</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+/* ─────────────────────
+   SAVE PROFILE
+───────────────────── */
+async function saveProfile() {
+  if (!currentUserId) { toast('Inicia sesión para guardar'); return; }
+  const name = document.getElementById('edit-name').value.trim();
+  try {
+    await MiAuth.saveProfile(currentUserId, { name, avatar_color: selectedColor });
+    // Actualizar UI
+    document.getElementById('profile-name').textContent = name || 'Sin nombre';
+    document.getElementById('profile-avatar').style.background = selectedColor;
+    document.getElementById('profile-avatar').textContent = (name || '?').slice(0, 2).toUpperCase();
+    toast('Perfil guardado ✓');
+  } catch (e) {
+    toast('Error al guardar');
+  }
+}
+
+/* ─────────────────────
+   APPLY USER UI
+───────────────────── */
+function applyUser(user, profile) {
+  currentUserId = user.id;
+  const name    = profile?.name || user.email?.split('@')[0] || 'Usuario';
+  const color   = profile?.avatar_color || COLORS[0];
+  const initials = name.slice(0, 2).toUpperCase();
+
+  document.getElementById('profile-name').textContent  = name;
+  document.getElementById('profile-email').textContent = user.email || '';
+  document.getElementById('profile-avatar').textContent = initials;
+  document.getElementById('profile-avatar').style.background = color;
+  document.getElementById('edit-name').value = name;
+
+  buildColorGrid(color);
+
+  // Badges dinámicos
+  const badges = document.getElementById('profile-badges');
+  badges.innerHTML = '';
+  const badgeData = [
+    { label: 'Vida Diaria', cls: 'badge-green' },
+    { label: 'Startup OS', cls: 'badge-blue' },
+    { label: 'Academia',   cls: 'badge-warm' },
+  ];
+  badgeData.forEach(b => {
+    const sp = document.createElement('span');
+    sp.className = `profile-badge ${b.cls}`;
+    sp.textContent = b.label;
+    badges.appendChild(sp);
+  });
+}
+
+/* ─────────────────────
+   UTILS
+───────────────────── */
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+/* ─────────────────────
+   INIT
+───────────────────── */
+// Cargar stats locales inmediatamente
+loadStats();
+buildColorGrid(COLORS[0]);
+
+// Auth: requireAuth redirige a index.html si no hay sesión
+MiAuth.requireAuth(function (user, profile) {
+  applyUser(user, profile);
+});
+</script>
+</body>
+</html>
